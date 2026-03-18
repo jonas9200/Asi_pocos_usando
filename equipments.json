@@ -26,5 +26,20 @@
     "topic_status": "as/poco/S1/status",
     "createdAt": "2026-03-18T15:19:13.658Z",
     "updatedAt": "2026-03-18T17:10:44.173Z"
+  },
+  {
+    "id": "1773858788600",
+    "name": "Pivô 25",
+    "type": "Pivô Central",
+    "location": "ddd",
+    "poco_id": "25",
+    "description": "",
+    "lat": -19.363042,
+    "lng": -47.369935,
+    "topic_cmd": "as/poco/25/comando",
+    "topic_dados": "as/poco/25/dados",
+    "topic_status": "as/poco/25/status",
+    "createdAt": "2026-03-18T18:33:08.601Z",
+    "updatedAt": "2026-03-18T18:33:08.601Z"
   }
 ]
