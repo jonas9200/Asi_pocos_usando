@@ -57,21 +57,28 @@
         .back-btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.25);
+            gap: 9px;
+            padding: 11px 22px;
+            background: #2196F3;
+            border: none;
             border-radius: 8px;
             color: white;
             text-decoration: none;
-            font-size: .88rem;
-            font-weight: 600;
+            font-size: .95rem;
+            font-weight: 700;
+            letter-spacing: .5px;
             cursor: pointer;
             transition: all .25s;
             white-space: nowrap;
             margin-top: 4px;
+            box-shadow: 0 3px 10px rgba(33,150,243,0.4);
         }
-        .back-btn:hover { background:rgba(255,255,255,0.2); transform:translateY(-1px); }
+        .back-btn:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 16px rgba(33,150,243,0.5);
+        }
+        .back-btn i { font-size: 1rem; }
 
         /* ── STATUS BAR ── */
         .status-bar {
@@ -337,7 +344,7 @@
         </div>
         <div class="sched-section"><i class="fas fa-calendar-week" style="margin-right:5px;color:var(--accent)"></i>Dias da Semana</div>
         <div class="days-grid" id="daysGrid"></div>
-        <button class="btn-success" id="schedSaveBtn" style="margin-top:0"><i class="fas fa-paper-plane"></i> Enviar ao ESP32</button>
+        <button class="btn-success" id="schedSaveBtn" style="margin-top:0"><i class="fas fa-paper-plane"></i> Salvar programção</button>
     </div>
 </div>
 
@@ -347,23 +354,14 @@
     <div class="header-row">
         <header>
             <h1><i class="fas fa-water"></i> <span id="eq-name">Carregando...</span></h1>
-            <p class="subtitle" id="eq-subtitle">Painel de Controle</p>
             <div class="status-bar">
-                <div class="status-item">
-                    <div class="status-indicator connected"></div>
-                    <span>Sistema Carregado</span>
-                </div>
-                <div class="status-item">
-                    <div class="status-indicator disconnected" id="mqtt-status"></div>
-                    <span id="mqtt-text">Conectando ao Broker...</span>
-                </div>
                 <div class="status-item">
                     <div class="status-indicator disconnected" id="device-status"></div>
                     <span id="device-text">ESP32 Offline</span>
                 </div>
             </div>
         </header>
-        <a href="/operador" class="back-btn"><i class="fas fa-arrow-left"></i> Voltar à Lista</a>
+        <a href="/operador" class="back-btn"><i class="fas fa-list"></i> LISTA</a>
     </div>
 
     <div class="error-alert"   id="error-alert"><strong>Erro:</strong> <span id="error-message"></span></div>
@@ -373,14 +371,10 @@
 
         <!-- Controle Manual -->
         <div class="card">
-            <h2><i class="fas fa-sliders-h"></i> Controle Manual</h2>
+            <h2><i class="fas fa-sliders-h"></i> Controle</h2>
             <div class="control-buttons">
                 <button class="btn-success" id="ligar-btn"    disabled><i class="fas fa-play"></i>  Ligar Poço</button>
                 <button class="btn-danger"  id="desligar-btn" disabled><i class="fas fa-stop"></i> Desligar Poço</button>
-            </div>
-            <div style="margin-top:14px">
-                <div class="status-value"><span class="status-label">Tópico Comando:</span></div>
-                <span class="topic-tag" id="topic-cmd-display">—</span>
             </div>
         </div>
 
@@ -396,18 +390,18 @@
                 <span class="status-data" id="modo-op">---</span>
             </div>
             <div class="status-value">
-                <span class="status-label">Falha do Sistema:</span>
+                <span class="status-label">Falha na Bomba:</span>
                 <span class="status-data" id="falha-st">---</span>
             </div>
             <div class="status-value">
-                <span class="status-label">Última Atualiz. ESP32:</span>
+                <span class="status-label">Última Atualização:</span>
                 <span class="status-data" id="ts-esp32">--/--/---- --:--:--</span>
             </div>
         </div>
 
         <!-- Programação -->
         <div class="card">
-            <h2><i class="fas fa-clock"></i> Programação Horária</h2>
+            <h2><i class="fas fa-clock"></i> Programação Horário de Ponto</h2>
             <div class="status-value">
                 <span class="status-label">Programação Ativa:</span>
                 <span class="status-data" id="sched-ativa">---</span>
@@ -461,10 +455,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Preenche cabeçalho com dados do equipamento
     document.title = `AGS — ${EQ.name}`;
-    document.getElementById('eq-name').textContent    = EQ.name;
-    document.getElementById('eq-subtitle').textContent =
-        `${EQ.type}${EQ.location ? ' · ' + EQ.location : ''} · ID: ${EQ.poco_id}`;
-    document.getElementById('topic-cmd-display').textContent = EQ.topic_cmd;
+    document.getElementById('eq-name').textContent = EQ.name;
 
     // ── 2. TÓPICOS MQTT DO EQUIPAMENTO ───────────────────────
     const T = {
@@ -503,15 +494,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // ── STATUS INDICATORS ──
-    function setMqttStatus(state) {
-        $('mqtt-status').className = 'status-indicator ' + state;
-        const L = { connected:'MQTT Online', disconnected:'MQTT Desconectado', connecting:'Conectando...' };
-        $('mqtt-text').textContent = L[state] || state;
-    }
     function setDevStatus(online) {
         devOk = online;
         $('device-status').className = 'status-indicator ' + (online ? 'connected' : 'disconnected');
-        $('device-text').textContent  = online ? 'ESP32 Online' : 'ESP32 Offline';
+        $('device-text').textContent  = online ? 'Equipamento Online' : 'Equipamento Offline';
         updateButtons();
     }
     function updateButtons() {
@@ -655,7 +641,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }, () => {
             publish(T.CMD, cmd);
             lastSchedMask = mask;
-            showOk('Programação enviada ao ESP32!');
+            showOk('Programação enviada ');
         });
     };
 
@@ -680,7 +666,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // ── CONNECT MQTT ──
     function connect() {
-        setMqttStatus('connecting');
         mqttClient = mqtt.connect(BROKER, {
             clientId:       'AGS_Web_' + EQ.poco_id + '_' + Math.random().toString(16).substr(2, 6),
             username:       'coas',
@@ -693,7 +678,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         mqttClient.on('connect', () => {
             mqttOk = true;
-            setMqttStatus('connected');
             updateButtons();
             showOk('Broker MQTT conectado!');
             [T.DADOS, T.STATUS].forEach(tp => {
@@ -721,12 +705,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         mqttClient.on('reconnect', () => {
             mqttOk = false;
-            setMqttStatus('connecting');
             setDevStatus(false);
         });
         mqttClient.on('close', () => {
             mqttOk = false;
-            setMqttStatus('disconnected');
             setDevStatus(false);
         });
         mqttClient.on('error', err => showErr('Erro MQTT: ' + err.message));
