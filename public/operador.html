@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGS Irrigação — Lista de Equipamentos</title>
+    <title>AS Irrigação — Lista de Equipamentos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -110,23 +110,16 @@
 <body>
 <div class="container">
     <header>
-        <h1><i class="fas fa-water"></i> AGS Irrigação</h1>
-        <p class="subtitle">Selecione um equipamento para acessar o painel de controle</p>
+        <h1><i class="fas fa-water"></i> AS Irrigação</h1>
+        <p class="subtitle"></p>
     </header>
 
     <div class="stats">
         <div class="stat-card"><span class="stat-num" id="s-total">0</span><span class="stat-label">Total</span></div>
-        <div class="stat-card"><span class="stat-num" id="s-pocos">0</span><span class="stat-label">Poços</span></div>
-        <div class="stat-card"><span class="stat-num" id="s-pivos">0</span><span class="stat-label">Pivôs</span></div>
-        <div class="stat-card"><span class="stat-num" id="s-outros">0</span><span class="stat-label">Outros</span></div>
     </div>
 
     <div class="filter-bar">
         <input class="search-input" id="search" placeholder="🔍  Buscar por nome ou localização...">
-        <button class="filter-btn active" data-filter="Todos">Todos</button>
-        <button class="filter-btn" data-filter="Poço">Poços</button>
-        <button class="filter-btn" data-filter="Pivô Central">Pivôs</button>
-        <button class="filter-btn" data-filter="Outro">Outros</button>
     </div>
 
     <div class="dashboard" id="dashboard">
@@ -206,10 +199,6 @@ function render() {
             <div class="card-detail">
                 <span class="detail-label">ID do Poço</span>
                 <span class="detail-value"><code>${eq.poco_id}</code></span>
-            </div>
-            <div class="card-detail">
-                <span class="detail-label">Tópico Dados</span>
-                <span class="detail-value"><span class="topic-chip">${eq.topic_dados}</span></span>
             </div>
             ${eq.description ? `<div class="card-detail">
                 <span class="detail-label">Descrição</span>
