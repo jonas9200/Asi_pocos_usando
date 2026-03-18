@@ -29,12 +29,6 @@
         h1 { font-size:2.5rem; color:var(--accent); margin-bottom:6px; }
         .subtitle { font-size:1.1rem; opacity:.85; }
 
-        /* Stats */
-        .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:13px; margin-bottom:22px; }
-        .stat-card { background:rgba(255,255,255,0.08); border-radius:10px; padding:16px; text-align:center; border:1px solid rgba(255,255,255,0.1); }
-        .stat-num   { font-size:2rem; font-weight:bold; color:var(--accent); display:block; }
-        .stat-label { font-size:.83rem; opacity:.72; margin-top:3px; }
-
         /* Filter */
         .filter-bar { display:flex; gap:9px; margin-bottom:20px; flex-wrap:wrap; align-items:center; }
         .search-input {
@@ -45,14 +39,6 @@
         }
         .search-input:focus { outline:none; border-color:var(--accent); }
         .search-input::placeholder { color:rgba(255,255,255,0.38); }
-        .filter-btn {
-            padding:10px 16px; border:1px solid rgba(255,255,255,0.2);
-            border-radius:7px; background:rgba(255,255,255,0.08);
-            color:rgba(255,255,255,0.65); cursor:pointer; font-size:.83rem;
-            font-weight:600; transition:all .2s; white-space:nowrap;
-        }
-        .filter-btn:hover,.filter-btn.active { background:rgba(33,150,243,0.22); border-color:var(--accent); color:white; }
-
         /* Dashboard */
         .dashboard { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:18px; }
 
@@ -114,19 +100,8 @@
         <p class="subtitle">Selecione um equipamento para acessar o painel de controle</p>
     </header>
 
-    <div class="stats">
-        <div class="stat-card"><span class="stat-num" id="s-total">0</span><span class="stat-label">Total</span></div>
-        <div class="stat-card"><span class="stat-num" id="s-pocos">0</span><span class="stat-label">Poços</span></div>
-        <div class="stat-card"><span class="stat-num" id="s-pivos">0</span><span class="stat-label">Pivôs</span></div>
-        <div class="stat-card"><span class="stat-num" id="s-outros">0</span><span class="stat-label">Outros</span></div>
-    </div>
-
     <div class="filter-bar">
         <input class="search-input" id="search" placeholder="🔍  Buscar por nome ou localização...">
-        <button class="filter-btn active" data-filter="Todos">Todos</button>
-        <button class="filter-btn" data-filter="Poço">Poços</button>
-        <button class="filter-btn" data-filter="Pivô Central">Pivôs</button>
-        <button class="filter-btn" data-filter="Outro">Outros</button>
     </div>
 
     <div class="dashboard" id="dashboard">
@@ -135,8 +110,7 @@
 </div>
 
 <script>
-let equipments   = [];
-let activeFilter = 'Todos';
+let equipments = [];
 
 const ICONS = {
     'Poço':         'fa-tint',
@@ -151,7 +125,6 @@ async function load() {
     try {
         const r = await fetch('/api/equipments');
         equipments = await r.json();
-        updateStats();
         render();
     } catch(e) {
         document.getElementById('dashboard').innerHTML =
@@ -159,28 +132,17 @@ async function load() {
     }
 }
 
-function updateStats() {
-    document.getElementById('s-total').textContent  = equipments.length;
-    document.getElementById('s-pocos').textContent  = equipments.filter(e => e.type === 'Poço').length;
-    document.getElementById('s-pivos').textContent  = equipments.filter(e => e.type === 'Pivô Central').length;
-    document.getElementById('s-outros').textContent = equipments.filter(e => !['Poço','Pivô Central'].includes(e.type)).length;
-}
-
 function render() {
-    const search  = document.getElementById('search').value.toLowerCase();
-    const dash    = document.getElementById('dashboard');
+    const search = document.getElementById('search').value.toLowerCase();
+    const dash   = document.getElementById('dashboard');
     dash.innerHTML = '';
 
-    const filtered = equipments.filter(eq => {
-        const matchType = activeFilter === 'Todos'
-            || eq.type === activeFilter
-            || (activeFilter === 'Outro' && !['Poço','Pivô Central'].includes(eq.type));
-        const matchSearch = !search
-            || eq.name.toLowerCase().includes(search)
-            || (eq.location || '').toLowerCase().includes(search)
-            || eq.poco_id.toLowerCase().includes(search);
-        return matchType && matchSearch;
-    });
+    const filtered = equipments.filter(eq =>
+        !search
+        || eq.name.toLowerCase().includes(search)
+        || (eq.location || '').toLowerCase().includes(search)
+        || eq.poco_id.toLowerCase().includes(search)
+    );
 
     if (filtered.length === 0) {
         dash.innerHTML = '<div class="empty"><i class="fas fa-search"></i><p>Nenhum equipamento encontrado.</p></div>';
@@ -232,15 +194,6 @@ function render() {
     });
 }
 
-// Filtros
-document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.onclick = () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeFilter = btn.dataset.filter;
-        render();
-    };
-});
 document.getElementById('search').oninput = render;
 
 load();
