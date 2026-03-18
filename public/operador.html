@@ -242,8 +242,8 @@
 <body>
 <div class="container">
     <header>
-        <h1><i class="fas fa-water"></i> AGS Irrigação</h1>
-        <p class="subtitle">Selecione um equipamento para acessar o painel de controle</p>
+        <h1><i class="fas fa-water"></i> AGS Irrigação (Poços)</h1>
+        <p class="subtitle"></p>
     </header>
 
     <div class="mqtt-bar">
@@ -432,15 +432,12 @@ function popupHTML(eq) {
         <div class="popup-name">
             <i class="fas ${ICONS[eq.type]||'fa-cog'}"></i> ${eq.name}
         </div>
-        <div class="popup-row"><span class="popup-key">Tipo</span><span class="popup-val">${eq.type}</span></div>
         <div class="popup-row"><span class="popup-key">Localização</span><span class="popup-val">${eq.location || '—'}</span></div>
-        <div class="popup-row"><span class="popup-key">ID</span><span class="popup-val"><code style="font-size:.75rem">${eq.poco_id}</code></span></div>
-        <div class="popup-row"><span class="popup-key">ESP32</span><span class="popup-val">${stLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Equipamento</span><span class="popup-val">${stLabel}</span></div>
         <div class="popup-row"><span class="popup-key">Estado</span><span class="popup-val">${wsLabel}</span></div>
         <div class="popup-row"><span class="popup-key">Modo</span><span class="popup-val">${modoLabel}</span></div>
         <div class="popup-row"><span class="popup-key">Falha</span><span class="popup-val">${falhaLabel}</span></div>
         <div class="popup-row"><span class="popup-key">Atualizado</span><span class="popup-val" style="font-size:.72rem">${tsLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Coordenadas</span><span class="popup-val" style="font-size:.7rem">${coordLabel}</span></div>
         ${eq.description ? `<div class="popup-row"><span class="popup-key">Descrição</span><span class="popup-val">${eq.description}</span></div>` : ''}
         <button class="popup-btn" onclick="window.location.href='/painel?id=${eq.id}'">
             <i class="fas fa-tachometer-alt"></i> Acessar Painel
