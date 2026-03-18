@@ -432,12 +432,12 @@ function popupHTML(eq) {
         <div class="popup-name">
             <i class="fas ${ICONS[eq.type]||'fa-cog'}"></i> ${eq.name}
         </div>
-        <div class="popup-row"><span class="popup-key">Localização</span><span class="popup-val">${eq.location || '—'}</span></div>
-        <div class="popup-row"><span class="popup-key">Equipamento</span><span class="popup-val">${stLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Estado</span><span class="popup-val">${wsLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Modo</span><span class="popup-val">${modoLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Falha</span><span class="popup-val">${falhaLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Atualizado</span><span class="popup-val" style="font-size:.72rem">${tsLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Localização:</span><span class="popup-val">${eq.location || '—'}</span></div>
+        <div class="popup-row"><span class="popup-key">Equipamento:</span><span class="popup-val">${stLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Estado:</span><span class="popup-val">${wsLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Modo:</span><span class="popup-val">${modoLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Falha:</span><span class="popup-val">${falhaLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Atualizado:</span><span class="popup-val" style="font-size:.72rem">${tsLabel}</span></div>
         ${eq.description ? `<div class="popup-row"><span class="popup-key">Descrição</span><span class="popup-val">${eq.description}</span></div>` : ''}
         <button class="popup-btn" onclick="window.location.href='/painel?id=${eq.id}'">
             <i class="fas fa-tachometer-alt"></i> Acessar Painel
@@ -481,7 +481,7 @@ function connectMQTT() {
     });
 
     mqttClient.on('connect', () => {
-        setMqttBar('ok', 'Broker MQTT conectado — monitorando equipamentos');
+        setMqttBar('ok', 'Sistema Online');
         subscribeAll();
     });
 
