@@ -274,8 +274,8 @@
     <div class="tab-pane" id="tab-mapa">
         <div id="map"></div>
         <div class="map-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#2196F3;border:2px solid #81C784"></div> Online · Ligado</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#4CAF50;border:2px solid #64B5F6"></div> Online · Desligado</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#2196F3;border:2px solid #64B5F6"></div> Online · Ligado</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#4CAF50;border:2px solid #81C784"></div> Online · Desligado</div>
             <div class="legend-item"><div class="legend-dot" style="background:#F44336;border:2px solid #E57373"></div> Offline</div>
             <div class="legend-item"><div class="legend-dot" style="background:#777;border:2px solid #aaa"></div> Aguardando</div>
         </div>
@@ -368,7 +368,7 @@ function makeIcon(eqId) {
     // Cor do label baseada no estado
     const labelColor = cls === 'online-ligado'    ? '#2196F3'
                      : cls === 'online-desligado' ? '#4CAF50'
-                     : cls === 'offline'          ? '#EF9A9A'
+                     : cls === 'offline'          ? '#F44336'
                      : '#ccc';
 
     return L.divIcon({
