@@ -357,7 +357,7 @@
             <div class="status-bar">
                 <div class="status-item">
                     <div class="status-indicator disconnected" id="device-status"></div>
-                    <span id="device-text">ESP32 Offline</span>
+                    <span id="device-text">Offline</span>
                 </div>
             </div>
         </header>
@@ -636,7 +636,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             'Início':      $('schedStart').value,
             'Parada':      $('schedEnd').value,
             'Dias':        maskToDays(mask),
-            'Tópico':      T.CMD,
             'Comando':     cmd,
         }, () => {
             publish(T.CMD, cmd);
@@ -650,7 +649,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         openModal(`Deseja LIGAR ${EQ.name}?`, {
             'Equipamento': EQ.name,
             'Comando':     'Liga',
-            'Tópico':      T.CMD,
             'Ação':        'Poço será ligado imediatamente',
         }, () => { publish(T.CMD, 'Liga'); showOk('Comando LIGAR enviado!'); });
     };
@@ -659,7 +657,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         openModal(`Deseja DESLIGAR ${EQ.name}?`, {
             'Equipamento': EQ.name,
             'Comando':     'Desliga',
-            'Tópico':      T.CMD,
             'Ação':        'Poço será desligado imediatamente',
         }, () => { publish(T.CMD, 'Desliga'); showOk('Comando DESLIGAR enviado!'); });
     };
