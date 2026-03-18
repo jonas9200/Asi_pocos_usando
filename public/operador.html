@@ -184,7 +184,44 @@
         .detail-label { font-weight:600; color:rgba(255,255,255,0.65); }
         .detail-value { color:var(--accent); text-align:right; }
 
-        .card-footer { margin-top:13px; }
+        /* JSON data block in card */
+        .json-block {
+            margin-top: 10px;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 7px;
+            overflow: hidden;
+        }
+        .json-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 11px;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            cursor: default;
+        }
+        .json-block-header span { color: var(--accent); font-size:.68rem; }
+        .json-rows { padding: 6px 4px; }
+        .json-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+            font-size: .76rem;
+            border-radius: 4px;
+            transition: background .15s;
+        }
+        .json-row:hover { background: rgba(255,255,255,0.05); }
+        .json-key  { color: rgba(255,255,255,0.5); font-family: monospace; word-break:break-all; }
+        .json-val  { color: #81d4fa; font-family: monospace; text-align:right; word-break:break-all; max-width:55%; }
+        .json-val.v-true  { color: #4CAF50; font-weight:700; }
+        .json-val.v-false { color: #F44336; font-weight:700; }
+        .json-val.v-num   { color: #ffcc80; }
+        .json-empty { padding:10px 8px; font-size:.76rem; color:rgba(255,255,255,0.25); text-align:center; font-style:italic; }
         .access-btn {
             width:100%; padding:11px; border:none; border-radius:7px;
             background:var(--accent); color:white; font-weight:bold; font-size:.92rem;
@@ -257,6 +294,7 @@ let equipments = [];
 let mqttClient = null;
 const deviceStatus = {}; // poco_id → 'online' | 'offline' | 'waiting'
 const wellState    = {}; // poco_id → 'LIGADO' | 'DESLIGADO' | null
+const rawJson      = {}; // poco_id → last parsed JSON object from topic_dados
 
 // ── MAP ──────────────────────────────────────────────────
 let map = null;
@@ -301,8 +339,8 @@ function initMap() {
 
     map = L.map('map').setView([centerLat, centerLng], zoom);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics',
         maxZoom: 19
     }).addTo(map);
 
@@ -414,6 +452,10 @@ function connectMQTT() {
         if (eqByDados) {
             try {
                 const data = JSON.parse(msg);
+                // Guarda JSON completo
+                rawJson[eqByDados.poco_id] = data;
+                updateCardJson(eqByDados.id, data);
+
                 const ligado = data.Ligado_desligado === '1' || data.Ligado_desligado === 1;
                 const estado = ligado ? 'LIGADO' : 'DESLIGADO';
                 if (wellState[eqByDados.poco_id] !== estado) {
@@ -482,6 +524,27 @@ function updateCardWellState(eqId, estado) {
     }
 }
 
+// Renderiza o JSON completo no bloco do card
+function updateCardJson(eqId, data) {
+    const block = document.querySelector(`.card[data-eq-id="${eqId}"] .json-rows`);
+    if (!block) return;
+    // Chaves a ocultar (já exibidas como campos dedicados ou irrelevantes para o operador)
+    const SKIP = new Set(['Ip']);
+    block.innerHTML = '';
+    Object.entries(data).forEach(([k, v]) => {
+        if (SKIP.has(k)) return;
+        const row = document.createElement('div');
+        row.className = 'json-row';
+        let valClass = 'json-val';
+        let display  = String(v);
+        if (v === true  || v === 1  || v === '1')  { valClass += ' v-true';  }
+        if (v === false || v === 0  || v === '0')  { valClass += ' v-false'; }
+        if (typeof v === 'number' && v !== 0 && v !== 1) valClass += ' v-num';
+        row.innerHTML = `<span class="json-key">${k}</span><span class="${valClass}">${display}</span>`;
+        block.appendChild(row);
+    });
+}
+
 // ── LOAD ─────────────────────────────────────────────────
 async function load() {
     try {
@@ -491,6 +554,7 @@ async function load() {
         equipments.forEach(eq => {
             if (!deviceStatus[eq.poco_id]) deviceStatus[eq.poco_id] = 'waiting';
             if (!wellState[eq.poco_id])    wellState[eq.poco_id]    = null;
+            if (!rawJson[eq.poco_id])      rawJson[eq.poco_id]      = null;
         });
         render();
         // Atualiza marcadores se o mapa já estiver aberto
@@ -533,6 +597,8 @@ function render() {
         card.className = `card${st !== 'waiting' ? ' ' + st : ''}`;
         card.dataset.eqId = eq.id;
 
+        const rj = rawJson[eq.poco_id];
+
         card.innerHTML = `
             <div class="card-header">
                 <div class="card-name">
@@ -560,6 +626,22 @@ function render() {
                 <span class="detail-label">Descrição</span>
                 <span class="detail-value">${eq.description}</span>
             </div>` : ''}
+            <div class="json-block">
+                <div class="json-block-header">
+                    <span>DADOS ESP32</span>
+                    <span>${eq.topic_dados}</span>
+                </div>
+                <div class="json-rows">${rj
+                    ? Object.entries(rj).filter(([k]) => k !== 'Ip').map(([k,v]) => {
+                        let cls = 'json-val';
+                        if (v===true||v===1||v==='1') cls+=' v-true';
+                        else if (v===false||v===0||v==='0') cls+=' v-false';
+                        else if (typeof v==='number') cls+=' v-num';
+                        return `<div class="json-row"><span class="json-key">${k}</span><span class="${cls}">${v}</span></div>`;
+                      }).join('')
+                    : '<div class="json-empty">Aguardando dados do ESP32...</div>'
+                }</div>
+            </div>
             <div class="card-footer">
                 <button class="access-btn">
                     <i class="fas fa-tachometer-alt"></i> Acessar Painel de Controle
