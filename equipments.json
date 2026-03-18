@@ -17,12 +17,12 @@
     "name": "Poço C3",
     "type": "Poço",
     "location": "Água Santa V",
-    "poco_id": "C3",
+    "poco_id": "S1",
     "description": "",
-    "topic_cmd": "as/poco/C3/comando",
-    "topic_dados": "as/poco/C3/dados",
-    "topic_status": "as/poco/C3/status",
+    "topic_cmd": "as/poco/S1/comando",
+    "topic_dados": "as/poco/S1/dados",
+    "topic_status": "as/poco/S1/status",
     "createdAt": "2026-03-18T15:19:13.658Z",
-    "updatedAt": "2026-03-18T15:19:13.658Z"
+    "updatedAt": "2026-03-18T17:10:10.931Z"
   }
 ]
