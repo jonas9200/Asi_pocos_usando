@@ -3,13 +3,13 @@
     "id": "1773846604472",
     "name": "teste",
     "type": "Poço",
-    "location": "as5",
+    "location": "Água Santa V",
     "poco_id": "C2",
     "description": "",
     "topic_cmd": "as/poco/C2/comando",
     "topic_dados": "as/poco/C2/dados",
     "topic_status": "as/poco/C2/status",
     "createdAt": "2026-03-18T15:10:04.472Z",
-    "updatedAt": "2026-03-18T15:10:50.641Z"
+    "updatedAt": "2026-03-18T15:12:59.851Z"
   }
 ]
