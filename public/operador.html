@@ -184,7 +184,44 @@
         .detail-label { font-weight:600; color:rgba(255,255,255,0.65); }
         .detail-value { color:var(--accent); text-align:right; }
 
-        .card-footer { margin-top:13px; }
+        /* JSON data block in card */
+        .json-block {
+            margin-top: 10px;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 7px;
+            overflow: hidden;
+        }
+        .json-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 11px;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            cursor: default;
+        }
+        .json-block-header span { color: var(--accent); font-size:.68rem; }
+        .json-rows { padding: 6px 4px; }
+        .json-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+            font-size: .76rem;
+            border-radius: 4px;
+            transition: background .15s;
+        }
+        .json-row:hover { background: rgba(255,255,255,0.05); }
+        .json-key  { color: rgba(255,255,255,0.5); font-family: monospace; word-break:break-all; }
+        .json-val  { color: #81d4fa; font-family: monospace; text-align:right; word-break:break-all; max-width:55%; }
+        .json-val.v-true  { color: #4CAF50; font-weight:700; }
+        .json-val.v-false { color: #F44336; font-weight:700; }
+        .json-val.v-num   { color: #ffcc80; }
+        .json-empty { padding:10px 8px; font-size:.76rem; color:rgba(255,255,255,0.25); text-align:center; font-style:italic; }
         .access-btn {
             width:100%; padding:11px; border:none; border-radius:7px;
             background:var(--accent); color:white; font-weight:bold; font-size:.92rem;
@@ -257,6 +294,7 @@ let equipments = [];
 let mqttClient = null;
 const deviceStatus = {}; // poco_id → 'online' | 'offline' | 'waiting'
 const wellState    = {}; // poco_id → 'LIGADO' | 'DESLIGADO' | null
+const rawJson      = {}; // poco_id → last parsed JSON object from topic_dados
 
 // ── MAP ──────────────────────────────────────────────────
 let map = null;
@@ -301,8 +339,8 @@ function initMap() {
 
     map = L.map('map').setView([centerLat, centerLng], zoom);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics',
         maxZoom: 19
     }).addTo(map);
 
@@ -326,33 +364,88 @@ function makeIcon(eqId) {
     const cls  = markerClass(eqId);
     const eq   = equipments.find(e => e.id === eqId);
     const icon = eq ? (ICONS[eq.type] || 'fa-cog') : 'fa-cog';
+    const name = eq ? eq.name : '';
+
+    // Cor do label baseada no estado
+    const labelColor = cls === 'online-ligado'    ? '#4CAF50'
+                     : cls === 'online-desligado' ? '#64B5F6'
+                     : cls === 'offline'          ? '#EF9A9A'
+                     : '#ccc';
+
     return L.divIcon({
         className: '',
-        html: `<div class="eq-marker ${cls}"><i class="fas ${icon}" style="color:white;font-size:.75rem"></i></div>`,
+        html: `
+            <div style="display:flex;align-items:center;gap:6px;white-space:nowrap">
+                <div class="eq-marker ${cls}">
+                    <i class="fas ${icon}" style="color:white;font-size:.75rem"></i>
+                </div>
+                <span style="
+                    background:rgba(0,0,0,0.72);
+                    color:${labelColor};
+                    font-size:.72rem;
+                    font-weight:700;
+                    padding:3px 8px;
+                    border-radius:10px;
+                    border:1px solid rgba(255,255,255,0.15);
+                    letter-spacing:.3px;
+                    text-shadow:0 1px 3px rgba(0,0,0,.8);
+                    pointer-events:none;
+                ">${name}</span>
+            </div>`,
         iconSize:   [32, 32],
         iconAnchor: [16, 16],
-        popupAnchor:[0, -18],
+        popupAnchor:[0, -22],
     });
 }
 
 function popupHTML(eq) {
     const st  = deviceStatus[eq.poco_id] || 'waiting';
     const ws  = wellState[eq.poco_id];
-    const stLabel = st === 'online' ? '<span style="color:#4CAF50">Online</span>'
-                  : st === 'offline' ? '<span style="color:#F44336">Offline</span>'
-                  : '<span style="color:#FFC107">Aguardando</span>';
+    const rj  = rawJson[eq.poco_id] || {};
+
+    const stLabel = st === 'online'  ? '<span style="color:#4CAF50;font-weight:700">● Online</span>'
+                  : st === 'offline' ? '<span style="color:#F44336;font-weight:700">● Offline</span>'
+                  : '<span style="color:#FFC107;font-weight:700">● Aguardando</span>';
+
     const wsLabel = ws === 'LIGADO'    ? '<span style="color:#4CAF50;font-weight:700">LIGADO</span>'
                   : ws === 'DESLIGADO' ? '<span style="color:#F44336;font-weight:700">DESLIGADO</span>'
-                  : '<span style="color:rgba(255,255,255,.4)">---</span>';
+                  : '<span style="color:rgba(255,255,255,.35)">---</span>';
+
+    const auto  = rj.Aut_man === '1' || rj.Aut_man === 1;
+    const falha = rj.Falha   === '1' || rj.Falha   === 1;
+
+    const modoLabel   = rj.Aut_man != null
+        ? (auto  ? '<span style="color:#4CAF50">Automático</span>' : '<span style="color:#FFC107">Manual</span>')
+        : '<span style="color:rgba(255,255,255,.35)">---</span>';
+
+    const falhaLabel  = rj.Falha != null
+        ? (falha ? '<span style="color:#F44336;font-weight:700">COM FALHA</span>' : '<span style="color:#4CAF50">Sem Falha</span>')
+        : '<span style="color:rgba(255,255,255,.35)">---</span>';
+
+    const tsLabel = rj.Ultima_atualizacao || rj.Registro || '---';
+
+    const coordLabel = (eq.lat && eq.lng)
+        ? `${parseFloat(eq.lat).toFixed(6)}, ${parseFloat(eq.lng).toFixed(6)}`
+        : '—';
+
     return `
-        <div class="popup-name"><i class="fas ${ICONS[eq.type]||'fa-cog'}"></i> ${eq.name}</div>
+        <div class="popup-name">
+            <i class="fas ${ICONS[eq.type]||'fa-cog'}"></i> ${eq.name}
+        </div>
         <div class="popup-row"><span class="popup-key">Tipo</span><span class="popup-val">${eq.type}</span></div>
-        <div class="popup-row"><span class="popup-key">Local</span><span class="popup-val">${eq.location || '—'}</span></div>
+        <div class="popup-row"><span class="popup-key">Localização</span><span class="popup-val">${eq.location || '—'}</span></div>
+        <div class="popup-row"><span class="popup-key">ID</span><span class="popup-val"><code style="font-size:.75rem">${eq.poco_id}</code></span></div>
         <div class="popup-row"><span class="popup-key">ESP32</span><span class="popup-val">${stLabel}</span></div>
         <div class="popup-row"><span class="popup-key">Estado</span><span class="popup-val">${wsLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Modo</span><span class="popup-val">${modoLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Falha</span><span class="popup-val">${falhaLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Atualizado</span><span class="popup-val" style="font-size:.72rem">${tsLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Coordenadas</span><span class="popup-val" style="font-size:.7rem">${coordLabel}</span></div>
+        ${eq.description ? `<div class="popup-row"><span class="popup-key">Descrição</span><span class="popup-val">${eq.description}</span></div>` : ''}
         <button class="popup-btn" onclick="window.location.href='/painel?id=${eq.id}'">
             <i class="fas fa-tachometer-alt"></i> Acessar Painel
-        </button>`;
+        </button>`
+;
 }
 
 function addMarker(eq) {
@@ -362,7 +455,7 @@ function addMarker(eq) {
         delete mapMarkers[eq.id];
     }
     const marker = L.marker([eq.lat, eq.lng], { icon: makeIcon(eq.id) })
-        .bindPopup(popupHTML(eq), { maxWidth: 220 })
+        .bindPopup(popupHTML(eq), { maxWidth: 280 })
         .addTo(map);
     mapMarkers[eq.id] = marker;
 }
@@ -414,6 +507,10 @@ function connectMQTT() {
         if (eqByDados) {
             try {
                 const data = JSON.parse(msg);
+                // Guarda JSON completo
+                rawJson[eqByDados.poco_id] = data;
+                updateCardJson(eqByDados.id, data);
+
                 const ligado = data.Ligado_desligado === '1' || data.Ligado_desligado === 1;
                 const estado = ligado ? 'LIGADO' : 'DESLIGADO';
                 if (wellState[eqByDados.poco_id] !== estado) {
@@ -482,6 +579,27 @@ function updateCardWellState(eqId, estado) {
     }
 }
 
+// Renderiza o JSON completo no bloco do card
+function updateCardJson(eqId, data) {
+    const block = document.querySelector(`.card[data-eq-id="${eqId}"] .json-rows`);
+    if (!block) return;
+    // Chaves a ocultar (já exibidas como campos dedicados ou irrelevantes para o operador)
+    const SKIP = new Set(['Ip']);
+    block.innerHTML = '';
+    Object.entries(data).forEach(([k, v]) => {
+        if (SKIP.has(k)) return;
+        const row = document.createElement('div');
+        row.className = 'json-row';
+        let valClass = 'json-val';
+        let display  = String(v);
+        if (v === true  || v === 1  || v === '1')  { valClass += ' v-true';  }
+        if (v === false || v === 0  || v === '0')  { valClass += ' v-false'; }
+        if (typeof v === 'number' && v !== 0 && v !== 1) valClass += ' v-num';
+        row.innerHTML = `<span class="json-key">${k}</span><span class="${valClass}">${display}</span>`;
+        block.appendChild(row);
+    });
+}
+
 // ── LOAD ─────────────────────────────────────────────────
 async function load() {
     try {
@@ -491,6 +609,7 @@ async function load() {
         equipments.forEach(eq => {
             if (!deviceStatus[eq.poco_id]) deviceStatus[eq.poco_id] = 'waiting';
             if (!wellState[eq.poco_id])    wellState[eq.poco_id]    = null;
+            if (!rawJson[eq.poco_id])      rawJson[eq.poco_id]      = null;
         });
         render();
         // Atualiza marcadores se o mapa já estiver aberto
@@ -533,6 +652,8 @@ function render() {
         card.className = `card${st !== 'waiting' ? ' ' + st : ''}`;
         card.dataset.eqId = eq.id;
 
+        const rj = rawJson[eq.poco_id];
+
         card.innerHTML = `
             <div class="card-header">
                 <div class="card-name">
@@ -560,6 +681,22 @@ function render() {
                 <span class="detail-label">Descrição</span>
                 <span class="detail-value">${eq.description}</span>
             </div>` : ''}
+            <div class="json-block">
+                <div class="json-block-header">
+                    <span>DADOS ESP32</span>
+                    <span>${eq.topic_dados}</span>
+                </div>
+                <div class="json-rows">${rj
+                    ? Object.entries(rj).filter(([k]) => k !== 'Ip').map(([k,v]) => {
+                        let cls = 'json-val';
+                        if (v===true||v===1||v==='1') cls+=' v-true';
+                        else if (v===false||v===0||v==='0') cls+=' v-false';
+                        else if (typeof v==='number') cls+=' v-num';
+                        return `<div class="json-row"><span class="json-key">${k}</span><span class="${cls}">${v}</span></div>`;
+                      }).join('')
+                    : '<div class="json-empty">Aguardando dados do ESP32...</div>'
+                }</div>
+            </div>
             <div class="card-footer">
                 <button class="access-btn">
                     <i class="fas fa-tachometer-alt"></i> Acessar Painel de Controle
