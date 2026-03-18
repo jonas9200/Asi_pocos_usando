@@ -1,0 +1,13 @@
+{
+  "name": "ags-lista-pocos",
+  "version": "2.0.0",
+  "description": "AGS Irrigação — painel universal MQTT com lista de equipamentos",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": {
+    "express":    "^4.18.2",
+    "cors":       "^2.8.5",
+    "node-fetch": "^2.6.7"
+  },
+  "engines": { "node": ">=14.0.0" }
+}
