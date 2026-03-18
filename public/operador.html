@@ -652,8 +652,6 @@ function render() {
         card.className = `card${st !== 'waiting' ? ' ' + st : ''}`;
         card.dataset.eqId = eq.id;
 
-        const rj = rawJson[eq.poco_id];
-
         card.innerHTML = `
             <div class="card-header">
                 <div class="card-name">
@@ -681,22 +679,6 @@ function render() {
                 <span class="detail-label">Descrição</span>
                 <span class="detail-value">${eq.description}</span>
             </div>` : ''}
-            <div class="json-block">
-                <div class="json-block-header">
-                    <span>DADOS ESP32</span>
-                    <span>${eq.topic_dados}</span>
-                </div>
-                <div class="json-rows">${rj
-                    ? Object.entries(rj).filter(([k]) => k !== 'Ip').map(([k,v]) => {
-                        let cls = 'json-val';
-                        if (v===true||v===1||v==='1') cls+=' v-true';
-                        else if (v===false||v===0||v==='0') cls+=' v-false';
-                        else if (typeof v==='number') cls+=' v-num';
-                        return `<div class="json-row"><span class="json-key">${k}</span><span class="${cls}">${v}</span></div>`;
-                      }).join('')
-                    : '<div class="json-empty">Aguardando dados do ESP32...</div>'
-                }</div>
-            </div>
             <div class="card-footer">
                 <button class="access-btn">
                     <i class="fas fa-tachometer-alt"></i> Acessar Painel de Controle
