@@ -29,50 +29,79 @@
         h1 { font-size:2.5rem; color:var(--accent); margin-bottom:6px; }
         .subtitle { font-size:1.1rem; opacity:.85; }
 
-        /* Filter */
-        .filter-bar { display:flex; gap:9px; margin-bottom:20px; flex-wrap:wrap; align-items:center; }
+        /* MQTT status bar */
+        .mqtt-bar {
+            display: flex; align-items:center; justify-content:center;
+            gap: 8px; margin-bottom:18px;
+            font-size:.82rem; color:rgba(255,255,255,0.5);
+        }
+        .mqtt-dot {
+            width:8px; height:8px; border-radius:50%;
+            background:var(--warning); flex-shrink:0; transition:all .3s;
+        }
+        .mqtt-dot.ok  { background:var(--success); box-shadow:0 0 7px var(--success); animation:gpulse 2s infinite; }
+        .mqtt-dot.err { background:var(--danger);  box-shadow:0 0 7px var(--danger); }
+
+        @keyframes gpulse { 0%,100%{box-shadow:0 0 4px var(--success)} 50%{box-shadow:0 0 13px var(--success)} }
+        @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:.35} }
+        @keyframes pulse  { 0%{box-shadow:0 0 0 0 rgba(76,175,80,.7)} 70%{box-shadow:0 0 0 7px rgba(76,175,80,0)} 100%{box-shadow:0 0 0 0 rgba(76,175,80,0)} }
+
+        /* Search */
+        .filter-bar { display:flex; margin-bottom:20px; }
         .search-input {
-            flex:1; min-width:200px;
-            padding:10px 14px;
+            flex:1; padding:10px 14px;
             background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.2);
             border-radius:7px; color:white; font-size:.9rem;
         }
         .search-input:focus { outline:none; border-color:var(--accent); }
         .search-input::placeholder { color:rgba(255,255,255,0.38); }
+
         /* Dashboard */
         .dashboard { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:18px; }
 
         /* Card */
         .card {
             background:rgba(30,30,50,0.85); border-radius:10px; padding:20px;
-            box-shadow:0 5px 15px rgba(0,0,0,0.3); border-left:4px solid var(--accent);
-            transition:all .3s; cursor:pointer;
+            box-shadow:0 5px 15px rgba(0,0,0,0.3); border-left:4px solid rgba(255,255,255,0.2);
+            transition:all .35s; cursor:pointer;
         }
-        .card:hover { transform:translateY(-4px); box-shadow:0 10px 24px rgba(0,0,0,0.45); border-left-color:var(--success); }
+        .card:hover      { transform:translateY(-4px); box-shadow:0 10px 24px rgba(0,0,0,0.45); }
+        .card.online     { border-left-color:var(--success); }
+        .card.offline    { border-left-color:var(--danger); }
 
-        .card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:13px; }
-        .card-name   { font-size:1.25rem; font-weight:bold; color:var(--accent); display:flex; align-items:center; gap:8px; }
+        .card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:13px; gap:8px; }
+        .card-name   { font-size:1.2rem; font-weight:bold; color:var(--accent); display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+
+        /* Status badge */
         .status-badge {
-            background:rgba(76,175,80,0.18); border:1px solid var(--success);
-            border-radius:12px; padding:3px 10px; font-size:.7rem; font-weight:700;
-            color:var(--success); white-space:nowrap; flex-shrink:0;
+            display: inline-flex; align-items:center; gap:5px;
+            border-radius:12px; padding:4px 11px;
+            font-size:.7rem; font-weight:700; white-space:nowrap; flex-shrink:0;
+            transition: all .35s;
         }
-
-        .card-detail { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed rgba(255,255,255,0.11); font-size:.86rem; }
-        .card-detail:last-of-type { border-bottom:none; }
-        .detail-label { font-weight:600; color:rgba(255,255,255,0.65); }
-        .detail-value { color:var(--accent); text-align:right; }
+        .status-badge.waiting {
+            background:rgba(255,179,0,0.14); border:1px solid rgba(255,179,0,0.38); color:var(--warning);
+        }
+        .status-badge.online {
+            background:rgba(76,175,80,0.18); border:1px solid var(--success); color:var(--success);
+        }
+        .status-badge.offline {
+            background:rgba(244,67,54,0.14); border:1px solid rgba(244,67,54,0.45); color:var(--danger);
+        }
+        .badge-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+        .status-badge.waiting .badge-dot { background:var(--warning); animation:blink 1.2s infinite; }
+        .status-badge.online  .badge-dot { background:var(--success); animation:pulse 2s infinite; }
+        .status-badge.offline .badge-dot { background:var(--danger); }
 
         .type-chip {
             display:inline-block; background:rgba(33,150,243,0.15);
             border:1px solid rgba(33,150,243,0.32); border-radius:9px;
             padding:2px 8px; font-size:.7rem; font-weight:600;
         }
-        .topic-chip {
-            font-family:monospace; font-size:.72rem;
-            background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.12);
-            border-radius:5px; padding:2px 7px; color:rgba(255,255,255,0.55);
-        }
+        .card-detail { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed rgba(255,255,255,0.11); font-size:.86rem; }
+        .card-detail:last-of-type { border-bottom:none; }
+        .detail-label { font-weight:600; color:rgba(255,255,255,0.65); }
+        .detail-value { color:var(--accent); text-align:right; }
 
         .card-footer { margin-top:13px; }
         .access-btn {
@@ -89,7 +118,6 @@
         @media (max-width:768px) {
             h1 { font-size:2rem; }
             .dashboard { grid-template-columns:1fr; }
-            .filter-bar { flex-direction:column; align-items:stretch; }
         }
     </style>
 </head>
@@ -100,6 +128,11 @@
         <p class="subtitle">Selecione um equipamento para acessar o painel de controle</p>
     </header>
 
+    <div class="mqtt-bar">
+        <div class="mqtt-dot" id="mqtt-dot"></div>
+        <span id="mqtt-label">Conectando ao broker MQTT...</span>
+    </div>
+
     <div class="filter-bar">
         <input class="search-input" id="search" placeholder="🔍  Buscar por nome ou localização...">
     </div>
@@ -109,8 +142,15 @@
     </div>
 </div>
 
+<script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
 <script>
+const BROKER    = 'wss://mqtt.aguasanta.agr.br';
+const MQTT_USER = 'coas';
+const MQTT_PASS = 'AguaSanta@452';
+
 let equipments = [];
+let mqttClient = null;
+const deviceStatus = {}; // poco_id → 'online' | 'offline' | 'waiting'
 
 const ICONS = {
     'Poço':         'fa-tint',
@@ -121,17 +161,87 @@ const ICONS = {
     'Outro':        'fa-cog'
 };
 
+// ── MQTT ─────────────────────────────────────────────────
+function connectMQTT() {
+    mqttClient = mqtt.connect(BROKER, {
+        clientId:       'AGS_OpList_' + Math.random().toString(16).substr(2, 8),
+        username:       MQTT_USER,
+        password:       MQTT_PASS,
+        keepalive:      60,
+        clean:          true,
+        connectTimeout: 6000,
+        reconnectPeriod:4000,
+    });
+
+    mqttClient.on('connect', () => {
+        setMqttBar('ok', 'Broker MQTT conectado — monitorando equipamentos');
+        subscribeAll();
+    });
+
+    mqttClient.on('message', (topic, payload) => {
+        const msg = payload.toString().toLowerCase().trim();
+        // Encontra o equipamento pelo tópico de status
+        const eq = equipments.find(e => e.topic_status === topic);
+        if (!eq) return;
+        const st = (msg === 'online') ? 'online' : 'offline';
+        if (deviceStatus[eq.poco_id] !== st) {
+            deviceStatus[eq.poco_id] = st;
+            updateCardBadge(eq.id, st);
+        }
+    });
+
+    mqttClient.on('reconnect', () => setMqttBar('warn', 'Reconectando ao broker MQTT...'));
+    mqttClient.on('close',     () => setMqttBar('err',  'Broker MQTT desconectado'));
+    mqttClient.on('error',     () => setMqttBar('err',  'Erro na conexão MQTT'));
+}
+
+function subscribeAll() {
+    equipments.forEach(eq => {
+        if (eq.topic_status) mqttClient.subscribe(eq.topic_status, { qos:1 });
+    });
+}
+
+function setMqttBar(state, label) {
+    const dot = document.getElementById('mqtt-dot');
+    dot.className = 'mqtt-dot' + (state === 'ok' ? ' ok' : state === 'err' ? ' err' : '');
+    document.getElementById('mqtt-label').textContent = label;
+}
+
+// Atualiza badge e borda do card sem re-renderizar a página inteira
+function updateCardBadge(eqId, status) {
+    const card  = document.querySelector(`.card[data-eq-id="${eqId}"]`);
+    const badge = card && card.querySelector('.status-badge');
+    if (!card || !badge) return;
+
+    // Atualiza classe da borda do card
+    card.classList.remove('online','offline');
+    card.classList.add(status);
+
+    // Atualiza badge
+    badge.className = `status-badge ${status}`;
+    const label = status === 'online' ? 'Online' : 'Offline';
+    badge.innerHTML = `<span class="badge-dot"></span>${label}`;
+}
+
+// ── LOAD ─────────────────────────────────────────────────
 async function load() {
     try {
         const r = await fetch('/api/equipments');
         equipments = await r.json();
+        // Marca todos como aguardando (não reseta os que já têm status)
+        equipments.forEach(eq => {
+            if (!deviceStatus[eq.poco_id]) deviceStatus[eq.poco_id] = 'waiting';
+        });
         render();
+        // Se MQTT já conectado, inscreve nos novos equipamentos
+        if (mqttClient && mqttClient.connected) subscribeAll();
     } catch(e) {
         document.getElementById('dashboard').innerHTML =
             '<div class="empty"><i class="fas fa-exclamation-triangle"></i><p>Erro ao carregar. Atualize a página.</p></div>';
     }
 }
 
+// ── RENDER ────────────────────────────────────────────────
 function render() {
     const search = document.getElementById('search').value.toLowerCase();
     const dash   = document.getElementById('dashboard');
@@ -150,16 +260,23 @@ function render() {
     }
 
     filtered.forEach(eq => {
-        const icon = ICONS[eq.type] || 'fa-cog';
+        const icon  = ICONS[eq.type] || 'fa-cog';
+        const st    = deviceStatus[eq.poco_id] || 'waiting';
+        const label = st === 'online' ? 'Online' : st === 'offline' ? 'Offline' : 'Aguardando...';
+
         const card = document.createElement('div');
-        card.className = 'card';
+        card.className = `card${st !== 'waiting' ? ' ' + st : ''}`;
+        card.dataset.eqId = eq.id;
+
         card.innerHTML = `
             <div class="card-header">
                 <div class="card-name">
                     <i class="fas ${icon}"></i> ${eq.name}
                     <span class="type-chip">${eq.type}</span>
                 </div>
-                <div class="status-badge"><i class="fas fa-circle" style="font-size:.55rem"></i> Ativo</div>
+                <div class="status-badge ${st}">
+                    <span class="badge-dot"></span>${label}
+                </div>
             </div>
             <div class="card-detail">
                 <span class="detail-label">Localização</span>
@@ -169,11 +286,8 @@ function render() {
                 <span class="detail-label">ID do Poço</span>
                 <span class="detail-value"><code>${eq.poco_id}</code></span>
             </div>
+            ${eq.description ? `
             <div class="card-detail">
-                <span class="detail-label">Tópico Dados</span>
-                <span class="detail-value"><span class="topic-chip">${eq.topic_dados}</span></span>
-            </div>
-            ${eq.description ? `<div class="card-detail">
                 <span class="detail-label">Descrição</span>
                 <span class="detail-value">${eq.description}</span>
             </div>` : ''}
@@ -183,20 +297,22 @@ function render() {
                 </button>
             </div>`;
 
-        // Clica em qualquer lugar do card OU no botão → abre o painel
         const open = () => { window.location.href = `/painel?id=${eq.id}`; };
         card.querySelector('.access-btn').onclick = open;
-        card.onclick = e => {
-            if (!e.target.closest('.access-btn')) open();
-        };
+        card.onclick = e => { if (!e.target.closest('.access-btn')) open(); };
 
         dash.appendChild(card);
     });
 }
 
+// ── INIT ─────────────────────────────────────────────────
 document.getElementById('search').oninput = render;
 
-load();
+load().then(() => {
+    if (typeof mqtt !== 'undefined') connectMQTT();
+    else setMqttBar('err', 'Biblioteca MQTT não carregada');
+});
+
 setInterval(load, 30000);
 </script>
 </body>
