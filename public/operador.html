@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGS Irrigação — Lista de Equipamentos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary:  #2e7d32;
+            --secondary:#00695c;
+            --accent:   #2196F3;
+            --success:  #4CAF50;
+            --warning:  #FFC107;
+            --danger:   #F44336;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
+        body {
+            background: linear-gradient(135deg,#1e3a8a,#1a2a6c,#0066cc);
+            color: white; min-height:100vh; padding:20px;
+        }
+        .container {
+            max-width: 1400px; margin:0 auto;
+            background: rgba(0,0,0,0.7);
+            border-radius:15px; padding:25px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.5);
+        }
+        header { text-align:center; margin-bottom:22px; padding-bottom:14px; border-bottom:2px solid var(--accent); }
+        h1 { font-size:2.5rem; color:var(--accent); margin-bottom:6px; }
+        .subtitle { font-size:1.1rem; opacity:.85; }
+
+        /* Stats */
+        .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:13px; margin-bottom:22px; }
+        .stat-card { background:rgba(255,255,255,0.08); border-radius:10px; padding:16px; text-align:center; border:1px solid rgba(255,255,255,0.1); }
+        .stat-num   { font-size:2rem; font-weight:bold; color:var(--accent); display:block; }
+        .stat-label { font-size:.83rem; opacity:.72; margin-top:3px; }
+
+        /* Filter */
+        .filter-bar { display:flex; gap:9px; margin-bottom:20px; flex-wrap:wrap; align-items:center; }
+        .search-input {
+            flex:1; min-width:200px;
+            padding:10px 14px;
+            background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.2);
+            border-radius:7px; color:white; font-size:.9rem;
+        }
+        .search-input:focus { outline:none; border-color:var(--accent); }
+        .search-input::placeholder { color:rgba(255,255,255,0.38); }
+        .filter-btn {
+            padding:10px 16px; border:1px solid rgba(255,255,255,0.2);
+            border-radius:7px; background:rgba(255,255,255,0.08);
+            color:rgba(255,255,255,0.65); cursor:pointer; font-size:.83rem;
+            font-weight:600; transition:all .2s; white-space:nowrap;
+        }
+        .filter-btn:hover,.filter-btn.active { background:rgba(33,150,243,0.22); border-color:var(--accent); color:white; }
+
+        /* Dashboard */
+        .dashboard { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:18px; }
+
+        /* Card */
+        .card {
+            background:rgba(30,30,50,0.85); border-radius:10px; padding:20px;
+            box-shadow:0 5px 15px rgba(0,0,0,0.3); border-left:4px solid var(--accent);
+            transition:all .3s; cursor:pointer;
+        }
+        .card:hover { transform:translateY(-4px); box-shadow:0 10px 24px rgba(0,0,0,0.45); border-left-color:var(--success); }
+
+        .card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:13px; }
+        .card-name   { font-size:1.25rem; font-weight:bold; color:var(--accent); display:flex; align-items:center; gap:8px; }
+        .status-badge {
+            background:rgba(76,175,80,0.18); border:1px solid var(--success);
+            border-radius:12px; padding:3px 10px; font-size:.7rem; font-weight:700;
+            color:var(--success); white-space:nowrap; flex-shrink:0;
+        }
+
+        .card-detail { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed rgba(255,255,255,0.11); font-size:.86rem; }
+        .card-detail:last-of-type { border-bottom:none; }
+        .detail-label { font-weight:600; color:rgba(255,255,255,0.65); }
+        .detail-value { color:var(--accent); text-align:right; }
+
+        .type-chip {
+            display:inline-block; background:rgba(33,150,243,0.15);
+            border:1px solid rgba(33,150,243,0.32); border-radius:9px;
+            padding:2px 8px; font-size:.7rem; font-weight:600;
+        }
+        .topic-chip {
+            font-family:monospace; font-size:.72rem;
+            background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.12);
+            border-radius:5px; padding:2px 7px; color:rgba(255,255,255,0.55);
+        }
+
+        .card-footer { margin-top:13px; }
+        .access-btn {
+            width:100%; padding:11px; border:none; border-radius:7px;
+            background:var(--accent); color:white; font-weight:bold; font-size:.92rem;
+            cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
+            transition:all .25s;
+        }
+        .access-btn:hover { background:#1976D2; transform:translateY(-2px); }
+
+        .loading,.empty { grid-column:1/-1; text-align:center; padding:40px; opacity:.7; }
+        .empty i { font-size:3rem; display:block; margin-bottom:13px; }
+
+        @media (max-width:768px) {
+            h1 { font-size:2rem; }
+            .dashboard { grid-template-columns:1fr; }
+            .filter-bar { flex-direction:column; align-items:stretch; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1><i class="fas fa-water"></i> AGS Irrigação</h1>
+        <p class="subtitle">Selecione um equipamento para acessar o painel de controle</p>
+    </header>
+
+    <div class="stats">
+        <div class="stat-card"><span class="stat-num" id="s-total">0</span><span class="stat-label">Total</span></div>
+        <div class="stat-card"><span class="stat-num" id="s-pocos">0</span><span class="stat-label">Poços</span></div>
+        <div class="stat-card"><span class="stat-num" id="s-pivos">0</span><span class="stat-label">Pivôs</span></div>
+        <div class="stat-card"><span class="stat-num" id="s-outros">0</span><span class="stat-label">Outros</span></div>
+    </div>
+
+    <div class="filter-bar">
+        <input class="search-input" id="search" placeholder="🔍  Buscar por nome ou localização...">
+        <button class="filter-btn active" data-filter="Todos">Todos</button>
+        <button class="filter-btn" data-filter="Poço">Poços</button>
+        <button class="filter-btn" data-filter="Pivô Central">Pivôs</button>
+        <button class="filter-btn" data-filter="Outro">Outros</button>
+    </div>
+
+    <div class="dashboard" id="dashboard">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando equipamentos...</div>
+    </div>
+</div>
+
+<script>
+let equipments   = [];
+let activeFilter = 'Todos';
+
+const ICONS = {
+    'Poço':         'fa-tint',
+    'Pivô Central': 'fa-sync-alt',
+    'Linear':       'fa-arrows-alt-h',
+    'Aspersor':     'fa-shower',
+    'Pluviômetro':  'fa-cloud-rain',
+    'Outro':        'fa-cog'
+};
+
+async function load() {
+    try {
+        const r = await fetch('/api/equipments');
+        equipments = await r.json();
+        updateStats();
+        render();
+    } catch(e) {
+        document.getElementById('dashboard').innerHTML =
+            '<div class="empty"><i class="fas fa-exclamation-triangle"></i><p>Erro ao carregar. Atualize a página.</p></div>';
+    }
+}
+
+function updateStats() {
+    document.getElementById('s-total').textContent  = equipments.length;
+    document.getElementById('s-pocos').textContent  = equipments.filter(e => e.type === 'Poço').length;
+    document.getElementById('s-pivos').textContent  = equipments.filter(e => e.type === 'Pivô Central').length;
+    document.getElementById('s-outros').textContent = equipments.filter(e => !['Poço','Pivô Central'].includes(e.type)).length;
+}
+
+function render() {
+    const search  = document.getElementById('search').value.toLowerCase();
+    const dash    = document.getElementById('dashboard');
+    dash.innerHTML = '';
+
+    const filtered = equipments.filter(eq => {
+        const matchType = activeFilter === 'Todos'
+            || eq.type === activeFilter
+            || (activeFilter === 'Outro' && !['Poço','Pivô Central'].includes(eq.type));
+        const matchSearch = !search
+            || eq.name.toLowerCase().includes(search)
+            || (eq.location || '').toLowerCase().includes(search)
+            || eq.poco_id.toLowerCase().includes(search);
+        return matchType && matchSearch;
+    });
+
+    if (filtered.length === 0) {
+        dash.innerHTML = '<div class="empty"><i class="fas fa-search"></i><p>Nenhum equipamento encontrado.</p></div>';
+        return;
+    }
+
+    filtered.forEach(eq => {
+        const icon = ICONS[eq.type] || 'fa-cog';
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <div class="card-header">
+                <div class="card-name">
+                    <i class="fas ${icon}"></i> ${eq.name}
+                    <span class="type-chip">${eq.type}</span>
+                </div>
+                <div class="status-badge"><i class="fas fa-circle" style="font-size:.55rem"></i> Ativo</div>
+            </div>
+            <div class="card-detail">
+                <span class="detail-label">Localização</span>
+                <span class="detail-value">${eq.location || '—'}</span>
+            </div>
+            <div class="card-detail">
+                <span class="detail-label">ID do Poço</span>
+                <span class="detail-value"><code>${eq.poco_id}</code></span>
+            </div>
+            <div class="card-detail">
+                <span class="detail-label">Tópico Dados</span>
+                <span class="detail-value"><span class="topic-chip">${eq.topic_dados}</span></span>
+            </div>
+            ${eq.description ? `<div class="card-detail">
+                <span class="detail-label">Descrição</span>
+                <span class="detail-value">${eq.description}</span>
+            </div>` : ''}
+            <div class="card-footer">
+                <button class="access-btn">
+                    <i class="fas fa-tachometer-alt"></i> Acessar Painel de Controle
+                </button>
+            </div>`;
+
+        // Clica em qualquer lugar do card OU no botão → abre o painel
+        const open = () => { window.location.href = `/painel?id=${eq.id}`; };
+        card.querySelector('.access-btn').onclick = open;
+        card.onclick = e => {
+            if (!e.target.closest('.access-btn')) open();
+        };
+
+        dash.appendChild(card);
+    });
+}
+
+// Filtros
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.filter;
+        render();
+    };
+});
+document.getElementById('search').oninput = render;
+
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>
