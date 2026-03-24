@@ -253,13 +253,13 @@
 <body>
 <div class="container">
     <header>
-        <h1><i class="fas fa-water"></i> AGS Irrigação</h1>
-        <p class="subtitle">Selecione um equipamento para acessar o painel de controle</p>
+        <h1><i class="fas fa-water"></i> AGS Irrigação (Poços)</h1>
+        <p class="subtitle"></p>
     </header>
 
     <div class="mqtt-bar">
         <div class="mqtt-dot" id="mqtt-dot"></div>
-        <span id="mqtt-label">Conectando ao broker MQTT...</span>
+        <span id="mqtt-label">Conectando ao Servidor...</span>
     </div>
 
     <!-- ABA LISTA -->
@@ -267,7 +267,7 @@
         <div class="view-bar">
             <div class="view-title"><i class="fa-solid fa-list"></i> Lista de Poços</div>
             <button class="view-switch-btn" onclick="switchTab('mapa')">
-                <i class="fa-solid fa-map"></i> Ver Mapa
+                <i class="fa-solid fa-map"></i>
             </button>
         </div>
         <div class="filter-bar">
@@ -283,7 +283,7 @@
         <div class="view-bar">
             <div class="view-title"><i class="fa-solid fa-map"></i> Mapa dos Poços</div>
             <button class="view-switch-btn" onclick="switchTab('lista')">
-                <i class="fa-solid fa-list"></i> Ver Lista
+                <i class="fa-solid fa-list"></i>
             </button>
         </div>
         <div id="map"></div>
@@ -315,36 +315,13 @@ let map = null;
 const mapMarkers = {}; // eq.id → L.marker
 
 const ICONS = {
-    'Poço':         'fa-tint',      // fallback, substituído pela imagem abaixo
+    'Poço':         'fa-tint',
     'Pivô Central': 'fa-sync-alt',
     'Linear':       'fa-arrows-alt-h',
     'Aspersor':     'fa-shower',
     'Pluviômetro':  'fa-cloud-rain',
     'Outro':        'fa-cog'
 };
-
-// Retorna o HTML do ícone correto para cada tipo
-function iconHTML(type, opts = {}) {
-    const size   = opts.size   || '1rem';
-    const color  = opts.color  || 'white';
-    const imgPx  = opts.imgPx  || '18px';
-    if (type === 'Poço') {
-        return `<div style="
-            width:${imgPx};height:${imgPx};
-            display:inline-block;vertical-align:middle;flex-shrink:0;
-            background-color:${color};
-            -webkit-mask-image:url('/bomba.png');
-            mask-image:url('/bomba.png');
-            -webkit-mask-size:contain;
-            mask-size:contain;
-            -webkit-mask-repeat:no-repeat;
-            mask-repeat:no-repeat;
-            -webkit-mask-position:center;
-            mask-position:center;
-        "></div>`;
-    }
-    return `<i class="fas ${ICONS[type] || 'fa-cog'}" style="font-size:${size};color:${color}"></i>`;
-}
 
 // ── TABS ─────────────────────────────────────────────────
 function switchTab(name) {
@@ -388,42 +365,27 @@ function markerClass(eqId) {
     const ws = wellState[eq.poco_id];
     if (st === 'offline')  return 'offline';
     if (st === 'waiting')  return 'waiting';
-    return ws === 'LIGADO' ? 'online-ligado' : 'online-desligado';
+    return ws === 'Ligado' ? 'online-ligado' : 'online-desligado';
 }
 
 function makeIcon(eqId) {
     const cls  = markerClass(eqId);
     const eq   = equipments.find(e => e.id === eqId);
+    const icon = eq ? (ICONS[eq.type] || 'fa-cog') : 'fa-cog';
     const name = eq ? eq.name : '';
-    const isPoco = eq && eq.type === 'Poço';
 
+    // Cor do label baseada no estado
     const labelColor = cls === 'online-ligado'    ? '#64B5F6'
                      : cls === 'online-desligado' ? '#4CAF50'
                      : cls === 'offline'          ? '#EF9A9A'
                      : '#ccc';
 
-    const innerHTML = isPoco
-        ? `<div style="
-                width:20px;height:20px;
-                background-color:white;
-                -webkit-mask-image:url('/bomba.png');
-                mask-image:url('/bomba.png');
-                -webkit-mask-size:contain;
-                mask-size:contain;
-                -webkit-mask-repeat:no-repeat;
-                mask-repeat:no-repeat;
-                -webkit-mask-position:center;
-                mask-position:center;
-                flex-shrink:0;
-            "></div>`
-        : `<i class="fas ${ICONS[eq?.type] || 'fa-cog'}" style="color:white;font-size:.75rem"></i>`;
-
     return L.divIcon({
         className: '',
         html: `
             <div style="display:flex;align-items:center;gap:6px;white-space:nowrap">
-                <div class="eq-marker ${cls}" style="overflow:hidden">
-                    ${innerHTML}
+                <div class="eq-marker ${cls}">
+                    <i class="fas ${icon}" style="color:white;font-size:.75rem"></i>
                 </div>
                 <span style="
                     background:rgba(0,0,0,0.72);
@@ -453,8 +415,8 @@ function popupHTML(eq) {
                   : st === 'offline' ? '<span style="color:#F44336;font-weight:700">● Offline</span>'
                   : '<span style="color:#FFC107;font-weight:700">● Aguardando</span>';
 
-    const wsLabel = ws === 'LIGADO'    ? '<span style="color:#4CAF50;font-weight:700">LIGADO</span>'
-                  : ws === 'DESLIGADO' ? '<span style="color:#F44336;font-weight:700">DESLIGADO</span>'
+    const wsLabel = ws === 'Ligado'    ? '<span style="color:#4CAF50;font-weight:700">Ligado</span>'
+                  : ws === 'Desligado' ? '<span style="color:#F44336;font-weight:700">Desligado</span>'
                   : '<span style="color:rgba(255,255,255,.35)">---</span>';
 
     const auto  = rj.Aut_man === '1' || rj.Aut_man === 1;
@@ -465,7 +427,7 @@ function popupHTML(eq) {
         : '<span style="color:rgba(255,255,255,.35)">---</span>';
 
     const falhaLabel  = rj.Falha != null
-        ? (falha ? '<span style="color:#F44336;font-weight:700">COM FALHA</span>' : '<span style="color:#4CAF50">Sem Falha</span>')
+        ? (falha ? '<span style="color:#F44336;font-weight:700">Com Falha</span>' : '<span style="color:#4CAF50">Sem Falha</span>')
         : '<span style="color:rgba(255,255,255,.35)">---</span>';
 
     const tsLabel = rj.Ultima_atualizacao || rj.Registro || '---';
@@ -476,17 +438,14 @@ function popupHTML(eq) {
 
     return `
         <div class="popup-name">
-            ${iconHTML(eq.type, { imgPx:'16px', color:'#2196F3' })} ${eq.name}
+            <i class="fas ${ICONS[eq.type]||'fa-cog'}"></i> ${eq.name}
         </div>
-        <div class="popup-row"><span class="popup-key">Tipo</span><span class="popup-val">${eq.type}</span></div>
-        <div class="popup-row"><span class="popup-key">Localização</span><span class="popup-val">${eq.location || '—'}</span></div>
-        <div class="popup-row"><span class="popup-key">ID</span><span class="popup-val"><code style="font-size:.75rem">${eq.poco_id}</code></span></div>
-        <div class="popup-row"><span class="popup-key">ESP32</span><span class="popup-val">${stLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Estado</span><span class="popup-val">${wsLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Modo</span><span class="popup-val">${modoLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Falha</span><span class="popup-val">${falhaLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Atualizado</span><span class="popup-val" style="font-size:.72rem">${tsLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Coordenadas</span><span class="popup-val" style="font-size:.7rem">${coordLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Localização:</span><span class="popup-val">${eq.location || '—'}</span></div>
+        <div class="popup-row"><span class="popup-key">Equipamento:</span><span class="popup-val">${stLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Estado:</span><span class="popup-val">${wsLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Modo:</span><span class="popup-val">${modoLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Falha:</span><span class="popup-val">${falhaLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Atualizado:</span><span class="popup-val" style="font-size:.77rem">${tsLabel}</span></div>
         ${eq.description ? `<div class="popup-row"><span class="popup-key">Descrição</span><span class="popup-val">${eq.description}</span></div>` : ''}
         <button class="popup-btn" onclick="window.location.href='/painel?id=${eq.id}'">
             <i class="fas fa-tachometer-alt"></i> Acessar Painel
@@ -530,7 +489,7 @@ function connectMQTT() {
     });
 
     mqttClient.on('connect', () => {
-        setMqttBar('ok', 'Broker MQTT conectado — monitorando equipamentos');
+        setMqttBar('ok', 'Servidor Online');
         subscribeAll();
     });
 
@@ -557,7 +516,7 @@ function connectMQTT() {
 
                 // Estado do poço
                 const ligado = data.Ligado_desligado === '1' || data.Ligado_desligado === 1;
-                const estado = ligado ? 'LIGADO' : 'DESLIGADO';
+                const estado = ligado ? 'Ligado' : 'Desligado';
                 wellState[eqByDados.poco_id] = estado;
 
                 // Sempre atualiza todos os campos do card (inclusive timestamp)
@@ -573,9 +532,9 @@ function connectMQTT() {
         }
     });
 
-    mqttClient.on('reconnect', () => setMqttBar('warn', 'Reconectando ao broker MQTT...'));
-    mqttClient.on('close',     () => setMqttBar('err',  'Broker MQTT desconectado'));
-    mqttClient.on('error',     () => setMqttBar('err',  'Erro na conexão MQTT'));
+    mqttClient.on('reconnect', () => setMqttBar('warn', 'Reconectando ao Servidor...'));
+    mqttClient.on('close',     () => setMqttBar('err',  'Servidor desconectado'));
+    mqttClient.on('error',     () => setMqttBar('err',  'Erro na conexão com o Servidor'));
 }
 
 function subscribeAll() {
@@ -626,7 +585,7 @@ function updateCardAllFields(eqId) {
     const wsEl = card.querySelector('.well-state-value');
     if (wsEl) {
         wsEl.textContent = ws || '---';
-        wsEl.style.color = ws === 'LIGADO' ? '#4CAF50' : ws === 'DESLIGADO' ? '#F44336' : 'rgba(255,255,255,0.4)';
+        wsEl.style.color = ws === 'Ligado' ? '#4CAF50' : ws === 'Desligado' ? '#F44336' : 'rgba(255,255,255,0.4)';
     }
 
     // Modo
@@ -641,7 +600,7 @@ function updateCardAllFields(eqId) {
     const falhaEl = card.querySelector('.falha-value');
     if (falhaEl) {
         const falha = rj.Falha === '1' || rj.Falha === 1;
-        falhaEl.textContent = rj.Falha != null ? (falha ? 'COM FALHA' : 'SEM FALHA') : '---';
+        falhaEl.textContent = rj.Falha != null ? (falha ? 'Com Falha' : 'Sem Falha') : '---';
         falhaEl.style.color = rj.Falha != null ? (falha ? '#F44336' : '#4CAF50') : 'rgba(255,255,255,0.4)';
     }
 
@@ -712,16 +671,17 @@ function render() {
     }
 
     filtered.forEach(eq => {
+        const icon  = ICONS[eq.type] || 'fa-cog';
         const st    = deviceStatus[eq.poco_id] || 'waiting';
         const label = st === 'online' ? 'Online' : st === 'offline' ? 'Offline' : 'Aguardando...';
         const ws    = wellState[eq.poco_id];
         const wsLabel = ws || '---';
-        const wsColor = ws === 'LIGADO' ? '#4CAF50' : ws === 'DESLIGADO' ? '#F44336' : 'rgba(255,255,255,0.4)';
+        const wsColor = ws === 'Ligado' ? '#4CAF50' : ws === 'Desligado' ? '#F44336' : 'rgba(255,255,255,0.4)';
 
         const rj = rawJson[eq.poco_id] || {};
         const auto  = rj.Aut_man != null ? (rj.Aut_man === '1' || rj.Aut_man === 1 ? 'Automático' : 'Manual') : '---';
         const autoColor = rj.Aut_man != null ? (rj.Aut_man === '1' || rj.Aut_man === 1 ? '#4CAF50' : '#FFC107') : 'rgba(255,255,255,0.4)';
-        const falha = rj.Falha != null ? (rj.Falha === '1' || rj.Falha === 1 ? 'COM FALHA' : 'SEM FALHA') : '---';
+        const falha = rj.Falha != null ? (rj.Falha === '1' || rj.Falha === 1 ? 'Com Falha' : 'Sem Falha') : '---';
         const falhaColor = rj.Falha != null ? (rj.Falha === '1' || rj.Falha === 1 ? '#F44336' : '#4CAF50') : 'rgba(255,255,255,0.4)';
         const ts = rj.Ultima_atualizacao || rj.Registro || '---';
 
@@ -732,35 +692,30 @@ function render() {
         card.innerHTML = `
             <div class="card-header">
                 <div class="card-name">
-                    ${iconHTML(eq.type, { size:'.95rem', imgPx:'20px', color:'#2196F3' })} ${eq.name}
-                    <span class="type-chip">${eq.type}</span>
+                    <i class="fas ${icon}"></i> ${eq.name}
                 </div>
                 <div class="status-badge ${st}">
                     <span class="badge-dot"></span>${label}
                 </div>
             </div>
             <div class="card-detail">
-                <span class="detail-label">Localização</span>
+                <span class="detail-label">Localização:</span>
                 <span class="detail-value">${eq.location || '—'}</span>
             </div>
             <div class="card-detail">
-                <span class="detail-label">ID do Poço</span>
-                <span class="detail-value"><code>${eq.poco_id}</code></span>
-            </div>
-            <div class="card-detail">
-                <span class="detail-label">Estado do Poço</span>
+                <span class="detail-label">Estado:</span>
                 <span class="detail-value well-state-value" style="color:${wsColor};font-weight:700">${wsLabel}</span>
             </div>
             <div class="card-detail">
-                <span class="detail-label">Modo</span>
+                <span class="detail-label">Modo:</span>
                 <span class="detail-value modo-value" style="color:${autoColor};font-weight:700">${auto}</span>
             </div>
             <div class="card-detail">
-                <span class="detail-label">Falha</span>
+                <span class="detail-label">Falha:</span>
                 <span class="detail-value falha-value" style="color:${falhaColor};font-weight:700">${falha}</span>
             </div>
             <div class="card-detail">
-                <span class="detail-label">Última Atualização</span>
+                <span class="detail-label">Última Atualização:</span>
                 <span class="detail-value ts-value" style="font-size:.78rem">${ts}</span>
             </div>
             ${eq.description ? `
