@@ -2,7 +2,7 @@
   {
     "id": "1773846895481",
     "name": "Poço C2",
-    "type": "Poço",
+    "type": "Linear",
     "location": "Água Santa V",
     "poco_id": "C2",
     "description": "",
@@ -10,7 +10,7 @@
     "topic_dados": "as/poco/C2/dados",
     "topic_status": "as/poco/C2/status",
     "createdAt": "2026-03-18T15:14:55.481Z",
-    "updatedAt": "2026-03-18T18:28:21.542Z",
+    "updatedAt": "2026-03-24T10:59:45.327Z",
     "lat": -19.360119,
     "lng": -47.364276
   },
