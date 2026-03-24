@@ -111,16 +111,12 @@
         .popup-btn   { display:block; width:100%; margin-top:10px; padding:8px; background:#2196F3; border:none; border-radius:6px; color:white; font-weight:700; font-size:.82rem; cursor:pointer; text-align:center; transition:background .2s; }
         .popup-btn:hover { background:#1976D2; }
 
-        /* Marker icon — flex-shrink:0 garante que o círculo nunca seja comprimido */
+        /* Marker icon */
         .eq-marker {
-            width: 32px;
-            height: 32px;
-            flex-shrink: 0;
+            width: 32px; height: 32px;
             border-radius: 50%;
             border: 3px solid white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items:center; justify-content:center;
             font-size: .8rem;
             box-shadow: 0 3px 10px rgba(0,0,0,0.5);
             transition: all .3s;
@@ -257,7 +253,7 @@
 <body>
 <div class="container">
     <header>
-        <h1><i class="fa-sharp-duotone fa-regular fa-arrow-up-from-water-pump"></i> AGS Irrigação (Poços)</h1>  <i class="fa-sharp-duotone fa-regular fa-arrow-up-from-water-pump"></i>
+        <h1><i class="fas fa-water"></i> AGS Irrigação (Poços)</h1>
         <p class="subtitle"></p>
     </header>
 
@@ -310,13 +306,13 @@ const MQTT_PASS = 'AguaSanta@452';
 
 let equipments = [];
 let mqttClient = null;
-const deviceStatus = {};
-const wellState    = {};
-const rawJson      = {};
+const deviceStatus = {}; // poco_id → 'online' | 'offline' | 'waiting'
+const wellState    = {}; // poco_id → 'LIGADO' | 'DESLIGADO' | null
+const rawJson      = {}; // poco_id → last parsed JSON object from topic_dados
 
 // ── MAP ──────────────────────────────────────────────────
 let map = null;
-const mapMarkers = {};
+const mapMarkers = {}; // eq.id → L.marker
 
 const ICONS = {
     'Poço':         'fa-tint',
@@ -378,6 +374,7 @@ function makeIcon(eqId) {
     const icon = eq ? (ICONS[eq.type] || 'fa-cog') : 'fa-cog';
     const name = eq ? eq.name : '';
 
+    // Cor do label baseada no estado
     const labelColor = cls === 'online-ligado'    ? '#64B5F6'
                      : cls === 'online-desligado' ? '#4CAF50'
                      : cls === 'offline'          ? '#EF9A9A'
@@ -403,8 +400,8 @@ function makeIcon(eqId) {
                     pointer-events:none;
                 ">${name}</span>
             </div>`,
-        iconSize:   null,      // ← sem restrição de tamanho no container flex
-        iconAnchor: [16, 16],  // ← ancora no centro exato do círculo (32/2)
+        iconSize:   [32, 32],
+        iconAnchor: [16, 16],
         popupAnchor:[0, -22],
     });
 }
@@ -435,6 +432,10 @@ function popupHTML(eq) {
 
     const tsLabel = rj.Ultima_atualizacao || rj.Registro || '---';
 
+    const coordLabel = (eq.lat && eq.lng)
+        ? `${parseFloat(eq.lat).toFixed(6)}, ${parseFloat(eq.lng).toFixed(6)}`
+        : '—';
+
     return `
         <div class="popup-name">
             <i class="fas ${ICONS[eq.type]||'fa-cog'}"></i> ${eq.name}
@@ -448,7 +449,8 @@ function popupHTML(eq) {
         ${eq.description ? `<div class="popup-row"><span class="popup-key">Descrição</span><span class="popup-val">${eq.description}</span></div>` : ''}
         <button class="popup-btn" onclick="window.location.href='/painel?id=${eq.id}'">
             <i class="fas fa-tachometer-alt"></i> Acessar Painel
-        </button>`;
+        </button>`
+;
 }
 
 function addMarker(eq) {
@@ -494,6 +496,7 @@ function connectMQTT() {
     mqttClient.on('message', (topic, payload) => {
         const msg = payload.toString().trim();
 
+        // ── tópico status (online/offline) ──
         const eqByStatus = equipments.find(e => e.topic_status === topic);
         if (eqByStatus) {
             const st = (msg.toLowerCase() === 'online') ? 'online' : 'offline';
@@ -504,18 +507,22 @@ function connectMQTT() {
             return;
         }
 
+        // ── tópico dados (JSON com estado do poço) ──
         const eqByDados = equipments.find(e => e.topic_dados === topic);
         if (eqByDados) {
             try {
                 const data = JSON.parse(msg);
                 rawJson[eqByDados.poco_id] = data;
 
+                // Estado do poço
                 const ligado = data.Ligado_desligado === '1' || data.Ligado_desligado === 1;
                 const estado = ligado ? 'Ligado' : 'Desligado';
                 wellState[eqByDados.poco_id] = estado;
 
+                // Sempre atualiza todos os campos do card (inclusive timestamp)
                 updateCardAllFields(eqByDados.id);
 
+                // Sempre atualiza marcador do mapa
                 const m = mapMarkers[eqByDados.id];
                 if (m) {
                     m.setIcon(makeIcon(eqByDados.id));
@@ -543,6 +550,7 @@ function setMqttBar(state, label) {
     document.getElementById('mqtt-label').textContent = label;
 }
 
+// Atualiza badge e borda do card sem re-renderizar a página inteira
 function updateCardBadge(eqId, status) {
     const card  = document.querySelector(`.card[data-eq-id="${eqId}"]`);
     const badge = card && card.querySelector('.status-badge');
@@ -553,6 +561,7 @@ function updateCardBadge(eqId, status) {
         const label = status === 'online' ? 'Online' : 'Offline';
         badge.innerHTML = `<span class="badge-dot"></span>${label}`;
     }
+    // Atualiza marcador no mapa
     const m = mapMarkers[eqId];
     if (m) {
         m.setIcon(makeIcon(eqId));
@@ -563,6 +572,7 @@ function updateCardBadge(eqId, status) {
     }
 }
 
+// Atualiza todos os campos dinâmicos do card a partir do rawJson
 function updateCardAllFields(eqId) {
     const card = document.querySelector(`.card[data-eq-id="${eqId}"]`);
     if (!card) return;
@@ -571,12 +581,14 @@ function updateCardAllFields(eqId) {
     const rj  = eq ? (rawJson[eq.poco_id] || {}) : {};
     const ws  = eq ? wellState[eq.poco_id] : null;
 
+    // Estado do poço
     const wsEl = card.querySelector('.well-state-value');
     if (wsEl) {
         wsEl.textContent = ws || '---';
         wsEl.style.color = ws === 'Ligado' ? '#4CAF50' : ws === 'Desligado' ? '#F44336' : 'rgba(255,255,255,0.4)';
     }
 
+    // Modo
     const modoEl = card.querySelector('.modo-value');
     if (modoEl) {
         const auto = rj.Aut_man === '1' || rj.Aut_man === 1;
@@ -584,6 +596,7 @@ function updateCardAllFields(eqId) {
         modoEl.style.color = rj.Aut_man != null ? (auto ? '#4CAF50' : '#FFC107') : 'rgba(255,255,255,0.4)';
     }
 
+    // Falha
     const falhaEl = card.querySelector('.falha-value');
     if (falhaEl) {
         const falha = rj.Falha === '1' || rj.Falha === 1;
@@ -591,13 +604,16 @@ function updateCardAllFields(eqId) {
         falhaEl.style.color = rj.Falha != null ? (falha ? '#F44336' : '#4CAF50') : 'rgba(255,255,255,0.4)';
     }
 
+    // Última atualização — sempre atualiza pois muda a cada mensagem
     const tsEl = card.querySelector('.ts-value');
     if (tsEl) tsEl.textContent = rj.Ultima_atualizacao || rj.Registro || '---';
 }
 
+// Renderiza o JSON completo no bloco do card
 function updateCardJson(eqId, data) {
     const block = document.querySelector(`.card[data-eq-id="${eqId}"] .json-rows`);
     if (!block) return;
+    // Chaves a ocultar (já exibidas como campos dedicados ou irrelevantes para o operador)
     const SKIP = new Set(['Ip']);
     block.innerHTML = '';
     Object.entries(data).forEach(([k, v]) => {
@@ -619,13 +635,16 @@ async function load() {
     try {
         const r = await fetch('/api/equipments');
         equipments = await r.json();
+        // Marca todos como aguardando (não reseta os que já têm status)
         equipments.forEach(eq => {
             if (!deviceStatus[eq.poco_id]) deviceStatus[eq.poco_id] = 'waiting';
             if (!wellState[eq.poco_id])    wellState[eq.poco_id]    = null;
             if (!rawJson[eq.poco_id])      rawJson[eq.poco_id]      = null;
         });
         render();
+        // Atualiza marcadores se o mapa já estiver aberto
         if (map) updateAllMarkers();
+        // Se MQTT já conectado, inscreve nos novos equipamentos
         if (mqttClient && mqttClient.connected) subscribeAll();
     } catch(e) {
         document.getElementById('dashboard').innerHTML =
