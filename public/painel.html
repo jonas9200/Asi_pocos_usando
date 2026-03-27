@@ -633,7 +633,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         const start   = $('schedStart').value.replace(':', '');
         const end     = $('schedEnd').value.replace(':', '');
         const mask    = getDaysMask();
-        const cmd     = `{P:${enabled},I:${start},F:${end},K:${mask}}`;
+        const cmd     = `{E:${enabled},I:${start},F:${end},K:${mask}}`;
 
         closeSchedModal();
         openModal(`Enviar nova programação para ${EQ.name}?`, {
@@ -654,14 +654,14 @@ document.addEventListener('DOMContentLoaded', async function () {
         openModal(`Deseja LIGAR ${EQ.name}?`, {
             'Equipamento': EQ.name,
             'Ação':        'Poço será ligado imediatamente',
-        }, () => { publish(T.CMD, 'Liga'); showOk('Comando LIGAR enviado!'); });
+        }, () => { publish(T.CMD, 'L:1'); showOk('Comando LIGAR enviado!'); });
     };
 
     $('desligar-btn').onclick = () => {
         openModal(`Deseja DESLIGAR ${EQ.name}?`, {
             'Equipamento': EQ.name,
             'Ação':        'Poço será desligado imediatamente',
-        }, () => { publish(T.CMD, 'Desliga'); showOk('Comando DESLIGAR enviado!'); });
+        }, () => { publish(T.CMD, 'L:0'); showOk('Comando DESLIGAR enviado!'); });
     };
 
     // ── CONNECT MQTT ──
