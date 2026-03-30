@@ -13,20 +13,5 @@
     "updatedAt": "2026-03-24T11:01:51.542Z",
     "lat": -19.360119,
     "lng": -47.364276
-  },
-  {
-    "id": "1773847153658",
-    "name": "Poço S1",
-    "type": "Poço",
-    "location": "Água Santa V",
-    "poco_id": "S1",
-    "description": "",
-    "topic_cmd": "as/poco/S1/comando",
-    "topic_dados": "as/poco/S1/dados",
-    "topic_status": "as/poco/S1/status",
-    "createdAt": "2026-03-18T15:19:13.658Z",
-    "updatedAt": "2026-03-23T18:29:01.505Z",
-    "lat": -19.351728,
-    "lng": -47.374489
   }
 ]
