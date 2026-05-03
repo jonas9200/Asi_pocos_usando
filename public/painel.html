@@ -13,7 +13,7 @@
             --success:  #4CAF50;
             --warning:  #FFC107;
             --danger:   #F44336;
-            --info:     #2196F3;
+            --nivel:    #00BCD4;
         }
 
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
@@ -34,7 +34,6 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* ── HEADER ── */
         .header-row {
             display: flex;
             justify-content: space-between;
@@ -51,8 +50,10 @@
             margin-bottom: 0;
         }
 
-        h1 { font-size:2.2rem; color:var(--accent); margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
-        .subtitle { font-size:1rem; opacity:.85; margin-bottom:14px; }
+        h1 {
+            font-size:2.2rem; color:var(--accent); margin-bottom:4px;
+            display:flex; align-items:center; flex-wrap:wrap; gap:8px;
+        }
 
         .eq-location-badge {
             display: none;
@@ -63,72 +64,45 @@
             border: 1px solid rgba(255,255,255,0.18);
             border-radius: 8px;
             padding: 4px 12px;
-            vertical-align: middle;
             letter-spacing: .3px;
         }
 
         .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-            padding: 11px 22px;
-            background: #2196F3;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            text-decoration: none;
-            font-size: .95rem;
-            font-weight: 700;
-            letter-spacing: .5px;
-            cursor: pointer;
-            transition: all .25s;
-            white-space: nowrap;
-            margin-top: 4px;
+            display: inline-flex; align-items: center; gap: 9px;
+            padding: 11px 22px; background: #2196F3; border: none;
+            border-radius: 8px; color: white; text-decoration: none;
+            font-size: .95rem; font-weight: 700; cursor: pointer;
+            transition: all .25s; white-space: nowrap; margin-top: 4px;
             box-shadow: 0 3px 10px rgba(33,150,243,0.4);
         }
-        .back-btn:hover {
-            background: #1976D2;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 16px rgba(33,150,243,0.5);
-        }
-        .back-btn i { font-size: 1rem; }
+        .back-btn:hover { background: #1976D2; transform: translateY(-2px); }
 
-        /* ── STATUS BAR ── */
         .status-bar {
-            display: flex;
-            align-items: center;
-            background: rgba(0,0,0,0.4);
-            padding: 11px 16px;
-            border-radius: 10px;
-            margin-top: 18px;
-            flex-wrap: wrap;
-            gap: 6px;
+            display: flex; align-items: center;
+            background: rgba(0,0,0,0.4); padding: 11px 16px;
+            border-radius: 10px; margin-top: 18px; flex-wrap: wrap; gap: 6px;
         }
         .status-item { display:flex; align-items:center; margin: 3px 12px; }
-        .status-indicator {
-            width:13px; height:13px;
-            border-radius: 50%;
-            margin-right: 8px;
-            transition: all .3s;
-        }
+        .status-indicator { width:13px; height:13px; border-radius: 50%; margin-right: 8px; transition: all .3s; }
         .connected    { background:var(--success); box-shadow:0 0 8px var(--success); animation:pulse 2s infinite; }
         .disconnected { background:var(--danger); }
         .connecting   { background:var(--warning); animation:blink 1.5s infinite; }
-        @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(76,175,80,.7)} 70%{box-shadow:0 0 0 8px rgba(76,175,80,0)} 100%{box-shadow:0 0 0 0 rgba(76,175,80,0)} }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.5} }
-        @keyframes slideDown { from{transform:translateY(-14px);opacity:0} to{transform:translateY(0);opacity:1} }
-        @keyframes fadeIn    { from{opacity:0} to{opacity:1} }
 
-        /* ── ALERTS ── */
+        @keyframes pulse    { 0%{box-shadow:0 0 0 0 rgba(76,175,80,.7)} 70%{box-shadow:0 0 0 8px rgba(76,175,80,0)} 100%{box-shadow:0 0 0 0 rgba(76,175,80,0)} }
+        @keyframes blink    { 0%,100%{opacity:1} 50%{opacity:.5} }
+        @keyframes slideDown{ from{transform:translateY(-14px);opacity:0} to{transform:translateY(0);opacity:1} }
+        @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+        @keyframes nivelRise{ from{height:0} to{height:var(--target-h)} }
+        @keyframes wavemove { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
         .error-alert, .success-alert {
             padding: 12px 16px; border-radius:7px;
-            margin: 12px 0 4px; display:none;
-            animation: slideDown .3s ease;
+            margin: 12px 0 4px; display:none; animation: slideDown .3s ease;
         }
         .error-alert   { background:rgba(244,67,54,.2);  border:1px solid var(--danger);  color:#ffcdd2; }
         .success-alert { background:rgba(76,175,80,.2);  border:1px solid var(--success); color:#c8e6c9; }
 
-        /* ── DASHBOARD ── */
+        /* ── DASHBOARD GRID ── */
         .dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(330px,1fr));
@@ -136,55 +110,37 @@
             margin-top: 22px;
         }
 
+        /* Card de nível ocupa largura maior quando sozinho em linha */
+        .card-nivel { grid-column: span 1; }
+
         .card {
             background: rgba(30,30,50,0.85);
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 10px; padding: 20px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
         }
 
         h2 {
-            color: var(--accent);
-            margin-bottom: 14px;
-            font-size: 1.25rem;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            padding-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 9px;
+            color: var(--accent); margin-bottom: 14px; font-size: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px;
+            display: flex; align-items: center; gap: 9px;
         }
+        h2.nivel-title { color: var(--nivel); border-color: rgba(0,188,212,0.25); }
 
-        /* ── STATUS ROWS ── */
         .status-value {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 6px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; padding-bottom: 6px;
             border-bottom: 1px dashed rgba(255,255,255,0.13);
         }
         .status-label { font-weight:600; font-size:.9rem; }
         .status-data  { color:var(--accent); font-weight:600; font-size:.9rem; text-align:right; }
 
-        /* ── BUTTONS ── */
         button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            background: var(--primary);
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all .25s;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-            font-size: .93rem;
+            width: 100%; padding: 12px; border: none; border-radius: 6px;
+            background: var(--primary); color: white; font-weight: bold;
+            cursor: pointer; transition: all .25s; margin-top: 10px;
+            display: flex; align-items: center; justify-content: center;
+            gap: 7px; font-size: .93rem;
         }
         button:disabled { opacity:.45; cursor:not-allowed; transform:none !important; }
         button:hover:not(:disabled) { background:var(--secondary); transform:translateY(-2px); }
@@ -193,59 +149,237 @@
         .btn-success { background:var(--success); }
         .btn-success:hover:not(:disabled) { background:#388E3C; }
 
-        .control-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 12px;
-        }
+        .control-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
         .control-buttons button { margin-top:0; }
 
-        /* ── SCHED EDIT BTN ── */
         .sched-edit-btn {
-            background: rgba(33,150,243,0.2);
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            border-radius: 6px;
-            font-size: .78rem;
-            padding: 8px 14px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            width: auto;
-            margin-top: 12px;
-            font-weight: 600;
-            transition: all .2s;
+            background: rgba(33,150,243,0.2); border: 1px solid var(--accent);
+            color: var(--accent); border-radius: 6px; font-size: .78rem;
+            padding: 8px 14px; cursor: pointer; display: inline-flex;
+            align-items: center; gap: 6px; width: auto; margin-top: 12px;
+            font-weight: 600; transition: all .2s;
         }
         .sched-edit-btn:hover:not(:disabled) { background:rgba(33,150,243,0.35); transform:translateY(-1px); }
 
-        /* ── TOPIC INFO ── */
-        .topic-tag {
-            font-family: monospace;
-            font-size: .75rem;
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 5px;
-            padding: 3px 8px;
-            color: rgba(255,255,255,0.6);
-            word-break: break-all;
+        /* ─────────────────────────────────────────
+           SENSOR DE NÍVEL — VISUAL
+        ───────────────────────────────────────── */
+        .nivel-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            margin-top: 4px;
         }
 
-        /* ── MODAL CONFIRMAÇÃO ── */
+        /* Reservatório gráfico */
+        .reservoir-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .reservoir {
+            width: 80px;
+            height: 160px;
+            border: 3px solid rgba(0,188,212,0.5);
+            border-radius: 6px 6px 10px 10px;
+            position: relative;
+            overflow: hidden;
+            background: rgba(0,0,0,0.4);
+            box-shadow: 0 0 16px rgba(0,188,212,0.15), inset 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        /* Marcações de escala */
+        .reservoir::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent,
+                transparent 19px,
+                rgba(255,255,255,0.12) 19px,
+                rgba(255,255,255,0.12) 20px
+            );
+            z-index: 3;
+        }
+
+        .water-body {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 0;
+            transition: height 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 1;
+        }
+
+        .water-fill {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,100,180,0.85), rgba(0,188,212,0.65));
+        }
+
+        /* Onda animada */
+        .wave-wrap {
+            position: absolute;
+            top: -10px;
+            left: 0;
+            width: 200%;
+            height: 20px;
+            z-index: 2;
+        }
+        .wave {
+            width: 200%;
+            height: 20px;
+            animation: wavemove 2.5s linear infinite;
+            fill: rgba(0,188,212,0.55);
+        }
+
+        /* Percentual dentro do reservatório */
+        .reservoir-pct {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        /* Topo do reservatório — tampa */
+        .reservoir-top {
+            width: 86px;
+            height: 8px;
+            background: rgba(0,188,212,0.3);
+            border: 2px solid rgba(0,188,212,0.5);
+            border-radius: 4px 4px 0 0;
+            margin-bottom: -2px;
+        }
+        .reservoir-base {
+            width: 90px;
+            height: 6px;
+            background: rgba(0,188,212,0.2);
+            border: 2px solid rgba(0,188,212,0.4);
+            border-radius: 0 0 6px 6px;
+            margin-top: -2px;
+        }
+
+        .reservoir-label {
+            font-size: .72rem;
+            color: rgba(0,188,212,0.7);
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-align: center;
+        }
+
+        /* Dados do nível ao lado do reservatório */
+        .nivel-dados {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .nivel-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 0;
+            border-bottom: 1px dashed rgba(0,188,212,0.15);
+            font-size: .86rem;
+        }
+        .nivel-row:last-child { border-bottom: none; }
+        .nivel-row-label { color: rgba(255,255,255,0.6); font-weight: 600; }
+        .nivel-row-value { color: var(--nivel); font-weight: 700; text-align: right; }
+
+        /* Barra de porcentagem linear */
+        .nivel-bar-wrap {
+            margin-top: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+            height: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(0,188,212,0.2);
+        }
+        .nivel-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            background: linear-gradient(to right, #0077b6, #00b4d8, #90e0ef);
+            transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            width: 0%;
+        }
+
+        /* Badge de status do sensor */
+        .sensor-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: .72rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid;
+        }
+        .sensor-badge.waiting { background:rgba(255,179,0,0.12); border-color:rgba(255,179,0,0.3); color:var(--warning); }
+        .sensor-badge.online  { background:rgba(0,188,212,0.12); border-color:rgba(0,188,212,0.4);  color:var(--nivel); }
+        .sensor-badge.offline { background:rgba(244,67,54,0.12); border-color:rgba(244,67,54,0.3);  color:var(--danger); }
+        .sensor-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+        .sensor-badge.online .sensor-dot { animation: pulse 2s infinite; box-shadow: 0 0 4px currentColor; }
+
+        /* SD info no card nível */
+        .nivel-sd-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .sd-chip {
+            font-size: .72rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.25);
+            color: rgba(255,255,255,0.45);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .sd-chip.ok   { border-color:rgba(76,175,80,0.3);  color:rgba(76,175,80,0.8); }
+        .sd-chip.fail { border-color:rgba(244,67,54,0.3); color:rgba(244,67,54,0.8); }
+
+        /* Sem sensor cadastrado */
+        .no-sensor-msg {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.25);
+            font-size: .85rem;
+            font-style: italic;
+        }
+        .no-sensor-msg i { display:block; font-size:1.8rem; margin-bottom:8px; opacity:.3; }
+
+        /* ── MODALS ── */
         .modal-overlay {
             display: none; position:fixed; inset:0;
             background:rgba(0,0,0,0.82); z-index:9000;
-            justify-content:center; align-items:center;
-            animation:fadeIn .2s;
+            justify-content:center; align-items:center; animation:fadeIn .2s;
         }
         .modal-overlay.active { display:flex; }
         .modal-content {
             background: linear-gradient(135deg,#1a2a6c,#2e7d32);
             border-radius:14px; padding:28px; max-width:480px; width:92%;
             box-shadow:0 20px 60px rgba(0,0,0,0.5);
-            border:2px solid var(--accent);
-            animation:slideDown .3s ease;
+            border:2px solid var(--accent); animation:slideDown .3s ease;
         }
         .modal-header { display:flex; align-items:center; gap:13px; margin-bottom:16px; padding-bottom:13px; border-bottom:2px solid rgba(255,255,255,0.2); }
         .modal-icon   { font-size:2rem; color:var(--warning); }
@@ -263,22 +397,10 @@
         .modal-btn-confirm { background:var(--success); color:white; }
         .modal-btn-confirm:hover { background:#388E3C; transform:translateY(-2px); }
 
-        /* ── MODAL PROGRAMAÇÃO ── */
-        .sched-modal-overlay {
-            display:none; position:fixed; inset:0;
-            background:rgba(0,0,0,0.85); z-index:9500;
-            justify-content:center; align-items:center;
-            animation:fadeIn .2s;
-        }
+        /* MODAL PROGRAMAÇÃO */
+        .sched-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9500; justify-content:center; align-items:center; animation:fadeIn .2s; }
         .sched-modal-overlay.active { display:flex; }
-        .sched-modal-content {
-            background: linear-gradient(135deg,#1a2a6c,#0d3b6e);
-            border-radius:14px; padding:28px; max-width:510px; width:92%;
-            max-height:92vh; overflow-y:auto;
-            border:2px solid var(--accent);
-            box-shadow:0 20px 60px rgba(0,0,0,0.6);
-            animation:slideDown .3s ease;
-        }
+        .sched-modal-content { background:linear-gradient(135deg,#1a2a6c,#0d3b6e); border-radius:14px; padding:28px; max-width:510px; width:92%; max-height:92vh; overflow-y:auto; border:2px solid var(--accent); box-shadow:0 20px 60px rgba(0,0,0,0.6); animation:slideDown .3s ease; }
         .sched-modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:13px; border-bottom:1px solid rgba(255,255,255,0.2); }
         .sched-modal-title  { font-size:1.2rem; font-weight:bold; color:var(--accent); display:flex; align-items:center; gap:9px; }
         .sched-close-btn    { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; padding:5px 11px; border-radius:6px; cursor:pointer; font-size:.82rem; width:auto; margin-top:0; transition:all .2s; }
@@ -306,7 +428,6 @@
         .day-btn.selected { background:rgba(33,150,243,0.22); border-color:var(--accent); color:var(--accent); }
         .day-btn.selected .day-dot { background:var(--accent); box-shadow:0 0 5px var(--accent); }
 
-        /* ── RESPONSIVE ── */
         @media (max-width:768px) {
             h1 { font-size:1.8rem; }
             .dashboard { grid-template-columns:1fr; }
@@ -315,7 +436,9 @@
             .modal-btn { width:100%; }
             .days-grid { grid-template-columns:repeat(4,1fr); }
             .time-grid { grid-template-columns:1fr; }
-            .sched-modal-content { padding:18px 13px; }
+            .nivel-container { flex-direction: column; align-items: center; }
+            .reservoir-wrap { flex-direction: row; gap: 12px; align-items: center; }
+            .reservoir { width: 60px; height: 120px; }
         }
     </style>
 </head>
@@ -326,7 +449,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <i class="fas fa-question-circle modal-icon"></i>
-            <h3 class="modal-title">Confirmar </h3>
+            <h3 class="modal-title">Confirmar</h3>
         </div>
         <div class="modal-body">
             <p class="modal-message" id="modalMessage"></p>
@@ -363,7 +486,6 @@
 
 <!-- ── PÁGINA ── -->
 <div class="container">
-
     <div class="header-row">
         <header>
             <h1>
@@ -384,7 +506,7 @@
     <div class="error-alert"   id="error-alert"><strong>Erro:</strong> <span id="error-message"></span></div>
     <div class="success-alert" id="success-alert"><strong>Sucesso:</strong> <span id="success-message"></span></div>
 
-    <div class="dashboard">
+    <div class="dashboard" id="main-dashboard">
 
         <!-- Controle Manual -->
         <div class="card">
@@ -440,6 +562,73 @@
             </button>
         </div>
 
+        <!-- Card Sensor de Nível — injetado dinamicamente se houver sensor vinculado -->
+        <div class="card card-nivel" id="card-nivel" style="display:none">
+            <h2 class="nivel-title">
+                <i class="fas fa-ruler-vertical"></i> Sensor de Nível
+                <span id="nivel-canal-label" style="font-size:.8rem;font-weight:500;color:rgba(0,188,212,0.6)"></span>
+            </h2>
+
+            <!-- Badge status sensor -->
+            <div class="sensor-badge waiting" id="sensor-status-badge">
+                <span class="sensor-dot"></span>
+                <span id="sensor-status-text">Aguardando...</span>
+            </div>
+
+            <!-- Conteúdo principal do nível -->
+            <div class="nivel-container" id="nivel-content">
+                <!-- Reservatório gráfico -->
+                <div class="reservoir-wrap">
+                    <div class="reservoir-top"></div>
+                    <div class="reservoir" id="reservoir">
+                        <div class="water-body" id="water-body">
+                            <div class="water-fill"></div>
+                            <div class="wave-wrap">
+                                <svg class="wave" viewBox="0 0 200 20" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M0 10 C20 0, 40 20, 60 10 C80 0, 100 20, 120 10 C140 0, 160 20, 180 10 C190 5, 195 8, 200 10 L200 20 L0 20 Z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="reservoir-pct" id="reservoir-pct">--</div>
+                    </div>
+                    <div class="reservoir-base"></div>
+                    <div class="reservoir-label" id="reservoir-label">Reservatório</div>
+                </div>
+
+                <!-- Dados numéricos -->
+                <div class="nivel-dados">
+                    <div class="nivel-row">
+                        <span class="nivel-row-label"><i class="fas fa-arrows-alt-v"></i> Distância</span>
+                        <span class="nivel-row-value" id="nivel-distancia">--- m</span>
+                    </div>
+                    <div class="nivel-row">
+                        <span class="nivel-row-label"><i class="fas fa-ruler"></i> Altura sensor</span>
+                        <span class="nivel-row-value" id="nivel-altura-sensor">--- m</span>
+                    </div>
+                    <div class="nivel-row">
+                        <span class="nivel-row-label"><i class="fas fa-water"></i> Nível calculado</span>
+                        <span class="nivel-row-value" id="nivel-nivel" style="font-size:1.05rem">--- m</span>
+                    </div>
+                    <div class="nivel-row">
+                        <span class="nivel-row-label"><i class="fas fa-percent"></i> Percentual</span>
+                        <span class="nivel-row-value" id="nivel-pct" style="font-size:1.1rem;color:#90e0ef">---%</span>
+                    </div>
+
+                    <!-- Barra de porcentagem -->
+                    <div class="nivel-bar-wrap" style="margin-top:6px">
+                        <div class="nivel-bar-fill" id="nivel-bar"></div>
+                    </div>
+
+                    <div class="nivel-row" style="margin-top:6px">
+                        <span class="nivel-row-label"><i class="fas fa-clock"></i> Atualizado</span>
+                        <span class="nivel-row-value" id="nivel-ts" style="font-size:.78rem;color:rgba(0,188,212,0.65)">---</span>
+                    </div>
+
+                    <!-- Info SD e fila -->
+                    <div class="nivel-sd-row" id="nivel-sd-row"></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -447,7 +636,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', async function () {
 
-    // ── 1. CARREGAR EQUIPAMENTO DA API ────────────────────────
+    // ── 1. CARREGAR EQUIPAMENTO ──────────────────────────────
     const params = new URLSearchParams(window.location.search);
     const eqId   = params.get('id');
 
@@ -458,7 +647,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     let EQ = null;
     try {
-        const r = await fetch('/api/equipments');
+        const r    = await fetch('/api/equipments');
         const list = await r.json();
         EQ = list.find(e => e.id === eqId);
     } catch(_) {}
@@ -468,26 +657,32 @@ document.addEventListener('DOMContentLoaded', async function () {
         return;
     }
 
-    // Preenche cabeçalho com dados do equipamento
     document.title = `AGS — ${EQ.name}`;
     document.getElementById('eq-name').textContent = EQ.name;
 
-    // Preenche o badge de localização se disponível
     if (EQ.location) {
         const badge = document.getElementById('eq-location-badge');
         badge.textContent = EQ.location;
         badge.style.display = 'inline';
     }
 
-    // ── 2. TÓPICOS MQTT DO EQUIPAMENTO ───────────────────────
+    // Verificar se tem sensor de nível vinculado
+    const hasNivel = !!(EQ.nivel_canal && EQ.nivel_topic);
+    if (hasNivel) {
+        document.getElementById('card-nivel').style.display = 'flex';
+        document.getElementById('nivel-canal-label').textContent = `— Canal ${EQ.nivel_canal}`;
+    }
+
+    // ── 2. TÓPICOS ───────────────────────────────────────────
     const T = {
         CMD:    EQ.topic_cmd,
         DADOS:  EQ.topic_dados,
-        STATUS: EQ.topic_status
+        STATUS: EQ.topic_status,
+        NIVEL:  EQ.nivel_topic || ''   // Ags/nivel/{canal}/dados
     };
 
     // ── 3. MQTT ───────────────────────────────────────────────
-    const BROKER       = 'wss://mqtt.aguasanta.agr.br';
+    const BROKER         = 'wss://mqtt.aguasanta.agr.br';
     const ONLINE_TIMEOUT = 20000;
 
     let mqttClient    = null;
@@ -496,6 +691,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     let lastMsg       = 0;
     let pendingCb     = null;
     let lastSchedMask = 127;
+
+    // Estado do nível
+    let nivelOnline   = false;
+    let lastNivelMsg  = 0;
+    const NIVEL_TIMEOUT = 60000; // 1 min sem dado = offline
 
     const $ = id => document.getElementById(id);
 
@@ -515,7 +715,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         showOk._t = setTimeout(() => $('success-alert').style.display = 'none', 3500);
     }
 
-    // ── STATUS INDICATORS ──
+    // ── STATUS DO POÇO ──
     let wellState = null;
 
     function setDevStatus(online) {
@@ -535,9 +735,90 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     setInterval(() => {
         if (mqttOk && lastMsg > 0 && Date.now() - lastMsg > ONLINE_TIMEOUT && devOk) setDevStatus(false);
+        // Verificar timeout do sensor de nível
+        if (hasNivel && nivelOnline && lastNivelMsg > 0 && Date.now() - lastNivelMsg > NIVEL_TIMEOUT) {
+            setNivelStatus('offline');
+        }
     }, 5000);
 
-    // ── HELPERS ──
+    // ── STATUS DO SENSOR DE NÍVEL ──
+    function setNivelStatus(state) {
+        nivelOnline = (state === 'online');
+        const badge = $('sensor-status-badge');
+        const text  = $('sensor-status-text');
+        if (!badge) return;
+        badge.className = `sensor-badge ${state}`;
+        text.textContent = state === 'online' ? 'Online' : state === 'offline' ? 'Offline' : 'Aguardando...';
+    }
+
+    // ── ATUALIZAR GRÁFICO DO RESERVATÓRIO ──
+    function updateReservoir(pct) {
+        const clamped  = Math.max(0, Math.min(100, pct));
+        const body     = $('water-body');
+        const pctLabel = $('reservoir-pct');
+        const bar      = $('nivel-bar');
+        const pctEl    = $('nivel-pct');
+
+        if (body)     body.style.height = clamped + '%';
+        if (pctLabel) pctLabel.textContent = Math.round(clamped) + '%';
+        if (bar)      bar.style.width = clamped + '%';
+        if (pctEl)    pctEl.textContent = clamped.toFixed(1) + '%';
+
+        // Cor da água conforme nível
+        if (body) {
+            const fill = body.querySelector('.water-fill');
+            if (fill) {
+                if      (clamped <= 20) fill.style.background = 'linear-gradient(to top, rgba(180,0,0,0.8), rgba(244,67,54,0.6))';
+                else if (clamped <= 40) fill.style.background = 'linear-gradient(to top, rgba(180,100,0,0.8), rgba(255,152,0,0.6))';
+                else                   fill.style.background = 'linear-gradient(to top, rgba(0,100,180,0.85), rgba(0,188,212,0.65))';
+            }
+        }
+    }
+
+    // ── HANDLER JSON DO SENSOR DE NÍVEL ──
+    function handleNivelJSON(data) {
+        lastNivelMsg = Date.now();
+        if (!nivelOnline) setNivelStatus('online');
+
+        // Distância do sensor
+        const dist = parseFloat(data.Distancia) || 0;
+        const altSensor  = parseFloat(data.Altura_sensor)   || 0;
+        const distCheia  = parseFloat(data.Distancia_cheio) || 0;
+
+        // Nível = altura útil preenchida (metros)
+        const nivelM = Math.max(0, altSensor - dist);
+        const altUtil = altSensor - distCheia;
+        // Porcentagem baseada na altura útil
+        const pct = altUtil > 0 ? Math.min(100, (nivelM / altUtil) * 100) : 0;
+
+        // Atualizar campos
+        if ($('nivel-distancia'))    $('nivel-distancia').textContent    = dist.toFixed(2) + ' m';
+        if ($('nivel-altura-sensor'))$('nivel-altura-sensor').textContent = altSensor.toFixed(2) + ' m';
+        if ($('nivel-nivel'))        $('nivel-nivel').textContent        = nivelM.toFixed(2) + ' m';
+        if ($('nivel-ts'))           $('nivel-ts').textContent           = data.Ultima_atualizacao || '---';
+
+        // Label do reservatório
+        const lbl = $('reservoir-label');
+        if (lbl) lbl.textContent = `Canal ${data.Canal || EQ.nivel_canal}`;
+
+        // Gráfico
+        updateReservoir(pct);
+
+        // Info SD
+        const sdRow = $('nivel-sd-row');
+        if (sdRow) {
+            const sdOk   = data.Sd_card === 'OK';
+            const fila   = parseInt(data.Quat_SD) || 0;
+            sdRow.innerHTML = `
+                <span class="sd-chip ${sdOk ? 'ok' : 'fail'}">
+                    <i class="fas fa-sd-card"></i> SD: ${data.Sd_card || '---'}
+                </span>
+                ${fila > 0 ? `<span class="sd-chip"><i class="fas fa-layer-group"></i> Fila: ${fila}</span>` : ''}
+            `;
+        }
+    }
+
+    // ── HELPERS POÇO ──
     const DAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
     function maskToDays(mask) {
         if (mask == null) return '---';
@@ -546,8 +827,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         return d.length ? d.join(' · ') : 'Nenhum';
     }
 
-    // ── JSON HANDLER ──
-    function handleJSON(data) {
+    function handlePocoJSON(data) {
         lastMsg = Date.now();
         if (!devOk) { setDevStatus(true); showOk('Conectado!'); }
 
@@ -581,7 +861,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (!mqttClient || !mqttOk) { showErr('MQTT não conectado'); return; }
         mqttClient.publish(topic, msg, { qos:1 }, err => {
             if (err) showErr('Falha ao enviar: ' + err.message);
-            else console.log('📤', topic, msg);
         });
     }
 
@@ -590,10 +869,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         $('modalMessage').textContent = message;
         let html = '';
         Object.entries(details).forEach(([k,v]) => {
-            html += `<div class="modal-detail-item">
-                        <span class="modal-detail-label">${k}:</span>
-                        <span class="modal-detail-value">${v}</span>
-                     </div>`;
+            html += `<div class="modal-detail-item"><span class="modal-detail-label">${k}:</span><span class="modal-detail-value">${v}</span></div>`;
         });
         $('modalDetails').innerHTML = html;
         $('confirmModal').classList.add('active');
@@ -654,7 +930,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         const end     = $('schedEnd').value.replace(':', '');
         const mask    = getDaysMask();
         const cmd     = `{E:${enabled},I:${start},F:${end},K:${mask}}`;
-
         closeSchedModal();
         openModal(`Enviar nova programação para ${EQ.name}?`, {
             'Equipamento': EQ.name,
@@ -662,21 +937,16 @@ document.addEventListener('DOMContentLoaded', async function () {
             'Início':      $('schedStart').value,
             'Parada':      $('schedEnd').value,
             'Dias':        maskToDays(mask),
-        }, () => {
-            publish(T.CMD, cmd);
-            lastSchedMask = mask;
-            showOk('Programação salva!');
-        });
+        }, () => { publish(T.CMD, cmd); lastSchedMask = mask; showOk('Programação salva!'); });
     };
 
-    // ── BOTÕES ──
+    // ── BOTÕES LIGAR/DESLIGAR ──
     $('ligar-btn').onclick = () => {
         openModal(`Deseja LIGAR ${EQ.name}?`, {
             'Equipamento': EQ.name,
             'Ação':        'Poço será ligado imediatamente',
         }, () => { publish(T.CMD, 'L:1'); showOk('Comando LIGAR enviado!'); });
     };
-
     $('desligar-btn').onclick = () => {
         openModal(`Deseja DESLIGAR ${EQ.name}?`, {
             'Equipamento': EQ.name,
@@ -700,38 +970,51 @@ document.addEventListener('DOMContentLoaded', async function () {
             mqttOk = true;
             updateButtons();
             showOk('Broker MQTT conectado!');
+
+            // Subscrever tópicos do poço
             [T.DADOS, T.STATUS].forEach(tp => {
                 mqttClient.subscribe(tp, { qos:1 }, err => {
                     if (err) showErr('Erro ao subscrever: ' + tp);
-                    else console.log('📡 Subscrito:', tp);
                 });
             });
+
+            // Subscrever tópico do sensor de nível (se vinculado)
+            if (hasNivel && T.NIVEL) {
+                mqttClient.subscribe(T.NIVEL, { qos:0 }, err => {
+                    if (!err) console.log('📡 Sensor nível subscrito:', T.NIVEL);
+                    else showErr('Erro ao subscrever nível: ' + T.NIVEL);
+                });
+            }
         });
 
         mqttClient.on('message', (topic, payload) => {
             const msg = payload.toString();
             lastMsg = Date.now();
-            console.log('📥', topic, msg);
 
+            // Tópico status do poço
             if (topic === T.STATUS) {
                 setDevStatus(msg.toLowerCase() === 'online');
                 return;
             }
+
+            // Tópico dados do poço
             if (topic === T.DADOS) {
-                try { handleJSON(JSON.parse(msg)); }
-                catch(e) { console.warn('JSON inválido:', e); }
+                try { handlePocoJSON(JSON.parse(msg)); }
+                catch(e) { console.warn('JSON poço inválido:', e); }
+                return;
+            }
+
+            // Tópico sensor de nível
+            if (hasNivel && topic === T.NIVEL) {
+                try { handleNivelJSON(JSON.parse(msg)); }
+                catch(e) { console.warn('JSON nível inválido:', e); }
+                return;
             }
         });
 
-        mqttClient.on('reconnect', () => {
-            mqttOk = false;
-            setDevStatus(false);
-        });
-        mqttClient.on('close', () => {
-            mqttOk = false;
-            setDevStatus(false);
-        });
-        mqttClient.on('error', err => showErr('Erro MQTT: ' + err.message));
+        mqttClient.on('reconnect', () => { mqttOk = false; setDevStatus(false); });
+        mqttClient.on('close',     () => { mqttOk = false; setDevStatus(false); });
+        mqttClient.on('error',     err => showErr('Erro MQTT: ' + err.message));
     }
 
     // ── INIT ──
