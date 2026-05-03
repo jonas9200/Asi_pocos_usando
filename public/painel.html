@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AS — Painel de Controle</title>
+    <title>AGS — Painel de Controle</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -51,8 +51,21 @@
             margin-bottom: 0;
         }
 
-        h1 { font-size:2.2rem; color:var(--accent); margin-bottom:4px; }
+        h1 { font-size:2.2rem; color:var(--accent); margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
         .subtitle { font-size:1rem; opacity:.85; margin-bottom:14px; }
+
+        .eq-location-badge {
+            display: none;
+            font-size: .9rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 8px;
+            padding: 4px 12px;
+            vertical-align: middle;
+            letter-spacing: .3px;
+        }
 
         .back-btn {
             display: inline-flex;
@@ -353,7 +366,11 @@
 
     <div class="header-row">
         <header>
-            <h1><i class="fas fa-water"></i> <span id="eq-name">Carregando...</span></h1>
+            <h1>
+                <i class="fas fa-water"></i>
+                <span id="eq-name">Carregando...</span>
+                <span class="eq-location-badge" id="eq-location-badge"></span>
+            </h1>
             <div class="status-bar">
                 <div class="status-item">
                     <div class="status-indicator disconnected" id="device-status"></div>
@@ -436,7 +453,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     if (!eqId) {
         document.getElementById('eq-name').textContent = 'Equipamento não especificado';
-        document.getElementById('eq-subtitle').textContent = 'Acesse pela lista de equipamentos';
         return;
     }
 
@@ -449,7 +465,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     if (!EQ) {
         document.getElementById('eq-name').textContent = 'Equipamento não encontrado';
-        document.getElementById('eq-subtitle').textContent = 'ID: ' + eqId;
         return;
     }
 
@@ -457,11 +472,18 @@ document.addEventListener('DOMContentLoaded', async function () {
     document.title = `AGS — ${EQ.name}`;
     document.getElementById('eq-name').textContent = EQ.name;
 
+    // Preenche o badge de localização se disponível
+    if (EQ.location) {
+        const badge = document.getElementById('eq-location-badge');
+        badge.textContent = EQ.location;
+        badge.style.display = 'inline';
+    }
+
     // ── 2. TÓPICOS MQTT DO EQUIPAMENTO ───────────────────────
     const T = {
-        CMD:    EQ.topic_cmd,    // as/poco/C2/comando
-        DADOS:  EQ.topic_dados,  // as/poco/C2/dados
-        STATUS: EQ.topic_status  // as/poco/C2/status
+        CMD:    EQ.topic_cmd,
+        DADOS:  EQ.topic_dados,
+        STATUS: EQ.topic_status
     };
 
     // ── 3. MQTT ───────────────────────────────────────────────
@@ -494,25 +516,23 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // ── STATUS INDICATORS ──
-    let wellState = null; // null = desconhecido, true = ligado, false = desligado
+    let wellState = null;
 
     function setDevStatus(online) {
         devOk = online;
         $('device-status').className = 'status-indicator ' + (online ? 'connected' : 'disconnected');
         $('device-text').textContent  = online ? 'Equipamento Online' : 'Equipamento Offline';
-        if (!online) wellState = null; // reseta estado ao ficar offline
+        if (!online) wellState = null;
         updateButtons();
     }
     function updateButtons() {
         const en = mqttOk && devOk;
-        // Se estado do poço é conhecido, desabilita o botão correspondente
         $('ligar-btn').disabled      = !en || wellState === true;
         $('desligar-btn').disabled   = !en || wellState === false;
         $('btn-edit-sched').disabled = !en;
         $('schedSaveBtn').disabled   = !mqttOk;
     }
 
-    // Timeout watch
     setInterval(() => {
         if (mqttOk && lastMsg > 0 && Date.now() - lastMsg > ONLINE_TIMEOUT && devOk) setDevStatus(false);
     }, 5000);
