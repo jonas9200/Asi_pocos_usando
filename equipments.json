@@ -4,14 +4,14 @@
     "name": "Poço 07",
     "type": "Poço",
     "location": "Sinimbu",
-    "poco_id": "07",
+    "poco_id": "S07",
     "description": "",
     "lat": -13.889228,
     "lng": -45.154617,
-    "topic_cmd": "as/poco/07/comando",
-    "topic_dados": "as/poco/07/dados",
-    "topic_status": "as/poco/07/status",
+    "topic_cmd": "as/poco/S07/comando",
+    "topic_dados": "as/poco/S07/dados",
+    "topic_status": "as/poco/S07/status",
     "createdAt": "2026-05-03T13:09:06.343Z",
-    "updatedAt": "2026-05-03T13:44:43.445Z"
+    "updatedAt": "2026-05-03T14:55:35.923Z"
   }
 ]
