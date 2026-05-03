@@ -12,9 +12,9 @@
     "topic_dados": "as/poco/S07/dados",
     "topic_status": "as/poco/S07/status",
     "createdAt": "2026-05-03T13:09:06.343Z",
-    "updatedAt": "2026-05-03T16:37:00.328Z",
-    "nivel_canal": "N01",
-    "nivel_topic": "Ags/nivel/N01/dados"
+    "updatedAt": "2026-05-03T21:22:13.369Z",
+    "nivel_canal": "01",
+    "nivel_topic": "Ags/nivel/01/dados"
   },
   {
     "id": "1777835787768",
