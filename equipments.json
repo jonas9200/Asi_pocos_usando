@@ -108,14 +108,14 @@
     "location": "Sinimbu",
     "poco_id": "S17",
     "description": "",
-    "lat": null,
-    "lng": null,
+    "lat": -13.903412,
+    "lng": -45.12558,
     "nivel_canal": "01",
     "nivel_topic": "Ags/nivel/01/dados",
     "topic_cmd": "as/poco/S17/comando",
     "topic_dados": "as/poco/S17/dados",
     "topic_status": "as/poco/S17/status",
     "createdAt": "2026-05-05T11:49:16.422Z",
-    "updatedAt": "2026-05-05T11:49:16.422Z"
+    "updatedAt": "2026-05-05T11:50:29.136Z"
   }
 ]
