@@ -617,8 +617,10 @@ function updateCardJson(eqId, data) {
 // ── LOAD ─────────────────────────────────────────────────
 async function load() {
     try {
-        const r = await fetch('/api/equipments');
-        equipments = await r.json();
+       const r = await fetch('/api/equipments');
+equipments = (await r.json()).sort((a, b) =>
+    a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
+);
         equipments.forEach(eq => {
             if (!deviceStatus[eq.poco_id]) deviceStatus[eq.poco_id] = 'waiting';
             if (!wellState[eq.poco_id])    wellState[eq.poco_id]    = null;
