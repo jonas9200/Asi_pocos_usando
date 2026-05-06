@@ -647,9 +647,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     let EQ = null;
     try {
-        const r    = await fetch('/api/equipments');
-        const list = await r.json();
-        EQ = list.find(e => e.id === eqId);
+       const r    = await fetch('/api/equipments');
+const list = (await r.json()).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+EQ = list.find(e => e.id === eqId);
     } catch(_) {}
 
     if (!EQ) {
