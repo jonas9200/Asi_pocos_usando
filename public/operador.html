@@ -3,727 +3,730 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGS Irrigação — Operador</title>
+    <title>AS Irrigação — Lista de Equipamentos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary:  #2e7d32; --secondary:#00695c; --accent:#2196F3;
-            --success:  #4CAF50; --warning:#FFC107; --danger:#F44336;
-            --nivel:    #00BCD4;
+            --primary:  #2e7d32;
+            --secondary:#00695c;
+            --accent:   #2196F3;
+            --success:  #4CAF50;
+            --warning:  #FFC107;
+            --danger:   #F44336;
         }
-
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
-
         body {
             background: linear-gradient(135deg,#1e3a8a,#1a2a6c,#0066cc);
-            color: white;
-            min-height: 100vh;
-            padding: 20px;
+            color: white; min-height:100vh; padding:20px;
         }
-
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
+            max-width: 1400px; margin:0 auto;
             background: rgba(0,0,0,0.7);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius:15px; padding:25px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.5);
         }
-
         header { text-align:center; margin-bottom:22px; padding-bottom:14px; border-bottom:2px solid var(--accent); }
         h1 { font-size:2.5rem; color:var(--accent); margin-bottom:6px; }
-        .subtitle { font-size:1.1rem; opacity:.85; margin-bottom:12px; }
-        .header-links { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:10px; }
-        .hlink {
-            display:inline-flex; align-items:center; gap:7px;
-            padding:8px 16px; border-radius:7px; font-size:.85rem; font-weight:600;
-            text-decoration:none; transition:all .2s; cursor:pointer; border:none;
-        }
-        .hlink-admin { background:rgba(33,150,243,0.18); border:1px solid var(--accent); color:var(--accent); }
-        .hlink-admin:hover { background:rgba(33,150,243,0.32); }
+        .subtitle { font-size:1.1rem; opacity:.85; }
 
-        /* Painel duplo */
-        .double-panel {
-            display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 20px;
-            margin-top: 15px;
+        /* MQTT status bar */
+        .mqtt-bar {
+            display: flex; align-items:center; justify-content:center;
+            gap: 8px; margin-bottom:18px;
+            font-size:.82rem; color:rgba(255,255,255,0.5);
         }
+        .mqtt-dot {
+            width:8px; height:8px; border-radius:50%;
+            background:var(--warning); flex-shrink:0; transition:all .3s;
+        }
+        .mqtt-dot.ok  { background:var(--success); box-shadow:0 0 7px var(--success); animation:gpulse 2s infinite; }
+        .mqtt-dot.err { background:var(--danger);  box-shadow:0 0 7px var(--danger); }
 
-        /* Mapa */
-        .map-card {
-            background: rgba(20,20,40,0.85);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid rgba(33,150,243,0.3);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        @keyframes gpulse { 0%,100%{box-shadow:0 0 4px var(--success)} 50%{box-shadow:0 0 13px var(--success)} }
+        @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:.35} }
+        @keyframes pulse  { 0%{box-shadow:0 0 0 0 rgba(76,175,80,.7)} 70%{box-shadow:0 0 0 7px rgba(76,175,80,0)} 100%{box-shadow:0 0 0 0 rgba(76,175,80,0)} }
+
+        /* View bar */
+        .view-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid rgba(255,255,255,0.12);
         }
+        .view-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .view-title i { font-size: 1.1rem; }
+        .view-switch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 20px;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: .88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .25s;
+            box-shadow: 0 3px 10px rgba(33,150,243,0.35);
+            letter-spacing: .3px;
+        }
+        .view-switch-btn:hover { background:#1976D2; transform:translateY(-2px); box-shadow:0 5px 16px rgba(33,150,243,0.45); }
+        .tab-pane { display:none; }
+        .tab-pane.active { display:block; }
+
+        /* Map */
         #map {
             width: 100%;
-            height: 450px;
-            background: #1a2a4a;
-        }
-        .map-footer {
-            padding: 10px 14px;
-            background: rgba(0,0,0,0.5);
-            font-size: .75rem;
-            text-align: center;
-            color: rgba(255,255,255,0.55);
-            border-top: 1px solid rgba(255,255,255,0.08);
-        }
-
-        /* Lista de equipamentos */
-        .list-card {
-            background: rgba(30,30,50,0.85);
-            border-radius: 12px;
-            padding: 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            max-height: 550px;
-            border: 1px solid rgba(33,150,243,0.2);
-        }
-        .list-header {
-            padding: 14px 16px;
-            background: rgba(0,0,0,0.3);
-            border-bottom: 2px solid var(--accent);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .list-header h3 {
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-        }
-        .list-header h3 i {
-            color: var(--accent);
-        }
-        .sort-buttons {
-            display: flex;
-            gap: 5px;
-        }
-        .sort-mini-btn {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 5px;
-            padding: 4px 9px;
-            font-size: .7rem;
-            cursor: pointer;
-            transition: all .2s;
-            color: rgba(255,255,255,0.6);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .sort-mini-btn:hover {
-            background: rgba(33,150,243,0.2);
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        .sort-mini-btn.active {
-            background: rgba(33,150,243,0.25);
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        .equip-list {
-            overflow-y: auto;
-            flex: 1;
-            padding: 8px 0;
-        }
-        .equip-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-            cursor: pointer;
-            transition: all .2s;
-            background: transparent;
-        }
-        .equip-item:hover {
-            background: rgba(33,150,243,0.12);
-            border-left: 3px solid var(--accent);
-            padding-left: 13px;
-        }
-        .equip-item.selected {
-            background: rgba(33,150,243,0.2);
-            border-left: 3px solid var(--accent);
-            padding-left: 13px;
-        }
-        .equip-info {
-            flex: 1;
-        }
-        .equip-name {
-            font-weight: bold;
-            font-size: .95rem;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            flex-wrap: wrap;
-        }
-        .equip-type {
-            font-size: .68rem;
-            background: rgba(33,150,243,0.18);
-            padding: 2px 7px;
-            border-radius: 12px;
-            color: var(--accent);
-        }
-        .equip-location {
-            font-size: .72rem;
-            color: rgba(255,255,255,0.5);
-            margin-top: 4px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .equip-nivel-badge {
-            font-size: .65rem;
-            background: rgba(0,188,212,0.15);
-            border: 1px solid rgba(0,188,212,0.3);
+            height: 520px;
             border-radius: 10px;
-            padding: 2px 7px;
-            color: var(--nivel);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin-left: 6px;
-        }
-        .equip-status {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #555;
-            flex-shrink: 0;
-            margin-left: 10px;
-        }
-        .equip-status.online {
-            background: var(--success);
-            box-shadow: 0 0 5px var(--success);
-            animation: pulse 1.8s infinite;
-        }
-        @keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(76,175,80,0.5); } 100% { box-shadow:0 0 0 5px rgba(76,175,80,0); } }
-
-        .empty-list {
-            text-align: center;
-            padding: 40px;
-            color: rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.12);
+            z-index: 1;
         }
 
-        /* Modal de detalhes */
-        .modal-bg {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn .2s;
+        /* Custom Leaflet popup */
+        .leaflet-popup-content-wrapper {
+            background: #0e1828 !important;
+            border: 1px solid rgba(33,150,243,0.4) !important;
+            border-radius: 10px !important;
+            color: white !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
         }
-        .modal-bg.open {
-            display: flex;
-        }
-        .modal-box {
-            background: linear-gradient(135deg,#1a2a6c,#0d3b6e);
-            border-radius: 14px;
-            padding: 24px;
-            width: 92%;
-            max-width: 500px;
-            max-height: 85vh;
-            overflow-y: auto;
-            border: 2px solid var(--accent);
-            animation: slideDown .3s ease;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-        }
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: var(--accent);
-        }
-        .modal-close {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 6px;
+        .leaflet-popup-tip { background: #0e1828 !important; }
+        .leaflet-popup-content { margin: 14px 16px !important; min-width: 180px; }
+        .popup-name  { font-size:1rem; font-weight:700; color:#2196F3; margin-bottom:8px; }
+        .popup-row   { display:flex; justify-content:space-between; font-size:.82rem; padding:4px 0; border-bottom:1px dashed rgba(255,255,255,0.1); }
+        .popup-row:last-of-type { border-bottom:none; }
+        .popup-key   { color:rgba(255,255,255,0.55); font-weight:600; }
+        .popup-val   { color:#2196F3; font-weight:600; text-align:right; }
+        .popup-btn   { display:block; width:100%; margin-top:10px; padding:8px; background:#2196F3; border:none; border-radius:6px; color:white; font-weight:700; font-size:.82rem; cursor:pointer; text-align:center; transition:background .2s; }
+        .popup-btn:hover { background:#1976D2; }
+
+        /* Marker icon — flex-shrink:0 garante que o círculo nunca seja comprimido */
+        .eq-marker {
             width: 32px;
             height: 32px;
-            cursor: pointer;
-            color: white;
-            font-size: 1rem;
             flex-shrink: 0;
-        }
-        .modal-close:hover {
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-        .modal-detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 9px 0;
-            border-bottom: 1px dashed rgba(255,255,255,0.1);
-            font-size: .88rem;
-        }
-        .modal-detail-label {
-            font-weight: 600;
-            color: rgba(255,255,255,0.6);
-        }
-        .modal-detail-value {
-            color: var(--accent);
-            text-align: right;
-            max-width: 60%;
-            word-break: break-word;
-        }
-        .modal-nivel {
-            background: rgba(0,188,212,0.08);
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 12px;
-            border-left: 3px solid var(--nivel);
-        }
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
-        .btn-painel {
-            flex: 1;
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 7px;
-            font-weight: bold;
-            cursor: pointer;
+            border-radius: 50%;
+            border: 3px solid white;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 7px;
-            transition: all .2s;
-            text-decoration: none;
+            font-size: .8rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+            transition: all .3s;
         }
-        .btn-painel:hover {
-            background: #1976D2;
-            transform: translateY(-2px);
+        .eq-marker.online-ligado   { background:#1565c0; border-color:#2196F3; }
+        .eq-marker.online-desligado{ background:#2e7d32; border-color:#4CAF50; }
+        .eq-marker.offline         { background:#b71c1c; border-color:#F44336; }
+        .eq-marker.waiting         { background:#555;    border-color:#aaa; }
+
+        .map-legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            font-size: .8rem;
+            color: rgba(255,255,255,0.6);
+            padding: 0 4px;
         }
+        .legend-item { display:flex; align-items:center; gap:7px; }
+        .legend-dot  { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
 
-        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-        @keyframes slideDown { from{transform:translateY(-20px);opacity:0} to{transform:translateY(0);opacity:1} }
+        /* Search */
+        .filter-bar { display:flex; margin-bottom:20px; }
+        .search-input {
+            flex:1; padding:10px 14px;
+            background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.2);
+            border-radius:7px; color:white; font-size:.9rem;
+        }
+        .search-input:focus { outline:none; border-color:var(--accent); }
+        .search-input::placeholder { color:rgba(255,255,255,0.38); }
 
-        @media (max-width: 900px) {
-            .double-panel { grid-template-columns: 1fr; }
-            .list-card { max-height: 400px; }
-            #map { height: 350px; }
+        /* Dashboard */
+        .dashboard { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:18px; }
+
+        /* Card */
+        .card {
+            background:rgba(30,30,50,0.85); border-radius:10px; padding:20px;
+            box-shadow:0 5px 15px rgba(0,0,0,0.3); border-left:4px solid rgba(255,255,255,0.2);
+            transition:all .35s; cursor:pointer;
+        }
+        .card:hover      { transform:translateY(-4px); box-shadow:0 10px 24px rgba(0,0,0,0.45); }
+        .card.online     { border-left-color:var(--success); }
+        .card.offline    { border-left-color:var(--danger); }
+
+        .card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:13px; gap:8px; }
+        .card-name   { font-size:1.2rem; font-weight:bold; color:var(--accent); display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex; align-items:center; gap:5px;
+            border-radius:12px; padding:4px 11px;
+            font-size:.7rem; font-weight:700; white-space:nowrap; flex-shrink:0;
+            transition: all .35s;
+        }
+        .status-badge.waiting {
+            background:rgba(255,179,0,0.14); border:1px solid rgba(255,179,0,0.38); color:var(--warning);
+        }
+        .status-badge.online {
+            background:rgba(76,175,80,0.18); border:1px solid var(--success); color:var(--success);
+        }
+        .status-badge.offline {
+            background:rgba(244,67,54,0.14); border:1px solid rgba(244,67,54,0.45); color:var(--danger);
+        }
+        .badge-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+        .status-badge.waiting .badge-dot { background:var(--warning); animation:blink 1.2s infinite; }
+        .status-badge.online  .badge-dot { background:var(--success); animation:pulse 2s infinite; }
+        .status-badge.offline .badge-dot { background:var(--danger); }
+
+        .type-chip {
+            display:inline-block; background:rgba(33,150,243,0.15);
+            border:1px solid rgba(33,150,243,0.32); border-radius:9px;
+            padding:2px 8px; font-size:.7rem; font-weight:600;
+        }
+        .card-detail { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed rgba(255,255,255,0.11); font-size:.86rem; }
+        .card-detail:last-of-type { border-bottom:none; }
+        .detail-label { font-weight:600; color:rgba(255,255,255,0.65); }
+        .detail-value { color:var(--accent); text-align:right; }
+
+        /* JSON data block in card */
+        .json-block {
+            margin-top: 10px;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 7px;
+            overflow: hidden;
+        }
+        .json-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 11px;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            cursor: default;
+        }
+        .json-block-header span { color: var(--accent); font-size:.68rem; }
+        .json-rows { padding: 6px 4px; }
+        .json-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+            font-size: .76rem;
+            border-radius: 4px;
+            transition: background .15s;
+        }
+        .json-row:hover { background: rgba(255,255,255,0.05); }
+        .json-key  { color: rgba(255,255,255,0.5); font-family: monospace; word-break:break-all; }
+        .json-val  { color: #81d4fa; font-family: monospace; text-align:right; word-break:break-all; max-width:55%; }
+        .json-val.v-true  { color: #4CAF50; font-weight:700; }
+        .json-val.v-false { color: #F44336; font-weight:700; }
+        .json-val.v-num   { color: #ffcc80; }
+        .json-empty { padding:10px 8px; font-size:.76rem; color:rgba(255,255,255,0.25); text-align:center; font-style:italic; }
+        .access-btn {
+            width:100%; padding:11px; border:none; border-radius:7px;
+            background:var(--accent); color:white; font-weight:bold; font-size:.92rem;
+            cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
+            transition:all .25s;
+        }
+        .access-btn:hover { background:#1976D2; transform:translateY(-2px); }
+
+        .loading,.empty { grid-column:1/-1; text-align:center; padding:40px; opacity:.7; }
+        .empty i { font-size:3rem; display:block; margin-bottom:13px; }
+
+        @media (max-width:768px) {
+            h1 { font-size:2rem; }
+            .dashboard { grid-template-columns:1fr; }
         }
     </style>
-    <!-- Leaflet CSS/JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
 </head>
 <body>
 <div class="container">
     <header>
-        <h1><i class="fas fa-tractor"></i> AGS Irrigação — Operador</h1>
-        <p class="subtitle">Visualização de equipamentos e status em tempo real</p>
-        <div class="header-links">
-            <a href="/admin" class="hlink hlink-admin"><i class="fas fa-lock"></i> Administrador</a>
-        </div>
+        <h1><i class="fas fa-water"></i> AS Irrigação (Poços)</h1>
+        <p class="subtitle"></p>
     </header>
 
-    <div class="double-panel">
-        <!-- Mapa -->
-        <div class="map-card">
-            <div id="map"></div>
-            <div class="map-footer">
-                <i class="fas fa-map-marker-alt"></i> Clique em qualquer equipamento no mapa ou na lista para ver detalhes
-            </div>
-        </div>
+    <div class="mqtt-bar">
+        <div class="mqtt-dot" id="mqtt-dot"></div>
+        <span id="mqtt-label">Conectando ao Servidor...</span>
+    </div>
 
-        <!-- Lista de equipamentos -->
-        <div class="list-card">
-            <div class="list-header">
-                <h3><i class="fas fa-list"></i> Equipamentos</h3>
-                <div class="sort-buttons">
-                    <button class="sort-mini-btn" id="sort-alpha-list"><i class="fas fa-sort-alpha-down"></i> A-Z</button>
-                    <button class="sort-mini-btn" id="sort-type-list"><i class="fas fa-filter"></i> Tipo</button>
-                </div>
-            </div>
-            <div class="equip-list" id="equip-list">
-                <div class="empty-list"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>
-            </div>
+    <!-- ABA LISTA -->
+    <div class="tab-pane active" id="tab-lista">
+        <div class="view-bar">
+            <div class="view-title"><i class="fa-solid fa-list"></i> Lista de Poços</div>
+            <button class="view-switch-btn" onclick="switchTab('mapa')">
+                <i class="fa-solid fa-map"></i>
+            </button>
+        </div>
+        <div class="filter-bar">
+            <input class="search-input" id="search" placeholder="🔍  Buscar por nome ou localização...">
+        </div>
+        <div class="dashboard" id="dashboard">
+            <div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando equipamentos...</div>
+        </div>
+    </div>
+
+    <!-- ABA MAPA -->
+    <div class="tab-pane" id="tab-mapa">
+        <div class="view-bar">
+            <div class="view-title"><i class="fa-solid fa-map"></i> Mapa dos Poços</div>
+            <button class="view-switch-btn" onclick="switchTab('lista')">
+                <i class="fa-solid fa-list"></i>
+            </button>
+        </div>
+        <div id="map"></div>
+        <div class="map-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#2196F3;border:2px solid #64B5F6"></div> Online · Ligado</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#4CAF50;border:2px solid #81C784"></div> Online · Desligado</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#F44336;border:2px solid #E57373"></div> Offline</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#777;border:2px solid #aaa"></div> Aguardando</div>
         </div>
     </div>
 </div>
 
-<!-- Modal de detalhes -->
-<div class="modal-bg" id="detailModal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <div class="modal-title" id="modal-title">Detalhes</div>
-            <button class="modal-close" id="modalCloseBtn"><i class="fas fa-times"></i></button>
-        </div>
-        <div id="modal-body"></div>
-        <div class="modal-actions">
-            <a href="#" id="modal-painel-link" class="btn-painel"><i class="fas fa-tachometer-alt"></i> Ir para Painel</a>
-        </div>
-    </div>
-</div>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
 <script>
-const $ = id => document.getElementById(id);
-let equipments = [];
-let map = null;
-let markers = {};
-let mqttClient = null;
-let deviceStatus = {}; // { poco_id: online? }
+const BROKER    = 'wss://mqtt.aguasanta.agr.br';
+const MQTT_USER = 'coas';
+const MQTT_PASS = 'AguaSanta@452';
 
-let currentSort = 'alpha'; // alpha, type
+let equipments = [];
+let mqttClient = null;
+const deviceStatus = {};
+const wellState    = {};
+const rawJson      = {};
+
+// ── MAP ──────────────────────────────────────────────────
+let map = null;
+const mapMarkers = {};
 
 const ICONS = {
-    'Poço': 'fa-tint',
+    'Poço':         'fa-tint',
     'Pivô Central': 'fa-sync-alt',
-    'Linear': 'fa-arrows-alt-h',
-    'Aspersor': 'fa-shower',
-    'Pluviômetro': 'fa-cloud-rain',
-    'Outro': 'fa-cog'
+    'Linear':       'fa-arrows-alt-h',
+    'Aspersor':     'fa-shower',
+    'Pluviômetro':  'fa-cloud-rain',
+    'Outro':        'fa-cog'
 };
 
-// Escape HTML básico
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
-}
-
-async function loadEquipments() {
-    try {
-        const res = await fetch('/api/equipments');
-        equipments = await res.json();
-        // Ordenar inicialmente por nome (alfabética)
-        sortEquipments();
-        renderList();
-        initMap();
-        connectMQTT();
-    } catch(e) {
-        console.error('Erro ao carregar equipamentos:', e);
-        $('equip-list').innerHTML = '<div class="empty-list"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar</div>';
-    }
-}
-
-function sortEquipments() {
-    if (currentSort === 'alpha') {
-        equipments.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-    } else if (currentSort === 'type') {
-        equipments.sort((a, b) => {
-            if (a.type === b.type) return a.name.localeCompare(b.name, 'pt-BR');
-            return a.type.localeCompare(b.type, 'pt-BR');
-        });
-    }
-}
-
-function updateSortButtons() {
-    const alphaBtn = $('sort-alpha-list');
-    const typeBtn = $('sort-type-list');
-    alphaBtn.classList.remove('active');
-    typeBtn.classList.remove('active');
-    if (currentSort === 'alpha') alphaBtn.classList.add('active');
-    else if (currentSort === 'type') typeBtn.classList.add('active');
-}
-
-$('sort-alpha-list').onclick = () => {
-    currentSort = 'alpha';
-    updateSortButtons();
-    sortEquipments();
-    renderList();
-    // Atualiza marcadores no mapa (reordenar não afeta marcadores, mas mantém sincronia)
-    updateMarkersOrder();
-};
-
-$('sort-type-list').onclick = () => {
-    currentSort = 'type';
-    updateSortButtons();
-    sortEquipments();
-    renderList();
-    updateMarkersOrder();
-};
-
-function updateMarkersOrder() {
-    // Apenas para manter consistência visual, os marcadores já existem
-    // Não precisa recriar, mas podemos garantir que o mapa reflita
-}
-
-function renderList() {
-    const container = $('equip-list');
-    if (!equipments.length) {
-        container.innerHTML = '<div class="empty-list"><i class="fas fa-database"></i> Nenhum equipamento cadastrado</div>';
-        return;
-    }
-
-    let html = '';
-    equipments.forEach(eq => {
-        const icon = ICONS[eq.type] || 'fa-cog';
-        const hasNivel = !!(eq.nivel_canal);
-        const statusClass = deviceStatus[eq.poco_id] === true ? 'online' : '';
-        html += `
-            <div class="equip-item" data-id="${eq.id}" data-poco="${eq.poco_id}">
-                <div class="equip-info">
-                    <div class="equip-name">
-                        <i class="fas ${icon}" style="color:var(--accent)"></i>
-                        ${escapeHtml(eq.name)}
-                        <span class="equip-type">${escapeHtml(eq.type)}</span>
-                        ${hasNivel ? `<span class="equip-nivel-badge"><i class="fas fa-ruler-vertical"></i> ${escapeHtml(eq.nivel_canal)}</span>` : ''}
-                    </div>
-                    <div class="equip-location">
-                        <i class="fas fa-map-marker-alt" style="font-size:.65rem"></i>
-                        ${escapeHtml(eq.location || 'Sem localização')}
-                    </div>
-                </div>
-                <div class="equip-status ${statusClass}" title="${statusClass === 'online' ? 'Online' : 'Offline'}"></div>
-            </div>
-        `;
-    });
-    container.innerHTML = html;
-
-    // Eventos de clique nos itens da lista
-    document.querySelectorAll('.equip-item').forEach(el => {
-        el.addEventListener('click', () => {
-            const id = el.dataset.id;
-            const eq = equipments.find(e => e.id === id);
-            if (eq) {
-                showDetails(eq);
-                highlightMarker(eq.id);
-                // Remove selected de todos e adiciona no clicado
-                document.querySelectorAll('.equip-item').forEach(i => i.classList.remove('selected'));
-                el.classList.add('selected');
-            }
-        });
-    });
+// ── TABS ─────────────────────────────────────────────────
+function switchTab(name) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'mapa') initMap();
 }
 
 function initMap() {
-    // Centralizar no Brasil (aproximado)
-    map = L.map('map').setView([-14.235, -51.925], 4.5);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> & CartoDB',
-        subdomains: 'abcd',
-        maxZoom: 19,
-        minZoom: 3
+    if (map) {
+        setTimeout(() => { map.invalidateSize(); updateAllMarkers(); }, 100);
+        return;
+    }
+
+    map = L.map('map');
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics',
+        maxZoom: 19
     }).addTo(map);
 
-    // Adicionar marcadores
-    equipments.forEach(eq => {
-        addMarker(eq);
+    equipments.forEach(eq => addMarker(eq));
+
+    const withCoords = equipments.filter(e => e.lat && e.lng);
+    if (withCoords.length === 1) {
+        map.setView([withCoords[0].lat, withCoords[0].lng], 16);
+    } else if (withCoords.length > 1) {
+        const bounds = L.latLngBounds(withCoords.map(e => [e.lat, e.lng]));
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 17 });
+    } else {
+        map.setView([-15.0, -47.0], 5);
+    }
+
+    setTimeout(() => map.invalidateSize(), 200);
+}
+
+function markerClass(eqId) {
+    const eq = equipments.find(e => e.id === eqId);
+    if (!eq) return 'waiting';
+    const st = deviceStatus[eq.poco_id] || 'waiting';
+    const ws = wellState[eq.poco_id];
+    if (st === 'offline')  return 'offline';
+    if (st === 'waiting')  return 'waiting';
+    return ws === 'Ligado' ? 'online-ligado' : 'online-desligado';
+}
+
+function makeIcon(eqId) {
+    const cls  = markerClass(eqId);
+    const eq   = equipments.find(e => e.id === eqId);
+    const icon = eq ? (ICONS[eq.type] || 'fa-cog') : 'fa-cog';
+    const name = eq ? eq.name : '';
+
+    const labelColor = cls === 'online-ligado'    ? '#64B5F6'
+                     : cls === 'online-desligado' ? '#4CAF50'
+                     : cls === 'offline'          ? '#EF9A9A'
+                     : '#ccc';
+
+    return L.divIcon({
+        className: '',
+        html: `
+            <div style="display:flex;align-items:center;gap:6px;white-space:nowrap">
+                <div class="eq-marker ${cls}">
+                    <i class="fas ${icon}" style="color:white;font-size:.75rem"></i>
+                </div>
+                <span style="
+                    background:rgba(0,0,0,0.72);
+                    color:${labelColor};
+                    font-size:.72rem;
+                    font-weight:700;
+                    padding:3px 8px;
+                    border-radius:10px;
+                    border:1px solid rgba(255,255,255,0.15);
+                    letter-spacing:.3px;
+                    text-shadow:0 1px 3px rgba(0,0,0,.8);
+                    pointer-events:none;
+                ">${name}</span>
+            </div>`,
+        iconSize:   null,      // ← sem restrição de tamanho no container flex
+        iconAnchor: [16, 16],  // ← ancora no centro exato do círculo (32/2)
+        popupAnchor:[0, -22],
     });
+}
+
+function popupHTML(eq) {
+    const st  = deviceStatus[eq.poco_id] || 'waiting';
+    const ws  = wellState[eq.poco_id];
+    const rj  = rawJson[eq.poco_id] || {};
+
+    const stLabel = st === 'online'  ? '<span style="color:#4CAF50;font-weight:700">● Online</span>'
+                  : st === 'offline' ? '<span style="color:#F44336;font-weight:700">● Offline</span>'
+                  : '<span style="color:#FFC107;font-weight:700">● Aguardando</span>';
+
+    const wsLabel = ws === 'Ligado'    ? '<span style="color:#4CAF50;font-weight:700">Ligado</span>'
+                  : ws === 'Desligado' ? '<span style="color:#F44336;font-weight:700">Desligado</span>'
+                  : '<span style="color:rgba(255,255,255,.35)">---</span>';
+
+    const auto  = rj.Aut_man === '1' || rj.Aut_man === 1;
+    const falha = rj.Falha   === '1' || rj.Falha   === 1;
+
+    const modoLabel   = rj.Aut_man != null
+        ? (auto  ? '<span style="color:#4CAF50">Automático</span>' : '<span style="color:#FFC107">Manual</span>')
+        : '<span style="color:rgba(255,255,255,.35)">---</span>';
+
+    const falhaLabel  = rj.Falha != null
+        ? (falha ? '<span style="color:#F44336;font-weight:700">Com Falha</span>' : '<span style="color:#4CAF50">Sem Falha</span>')
+        : '<span style="color:rgba(255,255,255,.35)">---</span>';
+
+    const tsLabel = rj.Ultima_atualizacao || rj.Registro || '---';
+
+    return `
+        <div class="popup-name">
+            <i class="fas ${ICONS[eq.type]||'fa-cog'}"></i> ${eq.name}
+        </div>
+        <div class="popup-row"><span class="popup-key">Localização:</span><span class="popup-val">${eq.location || '—'}</span></div>
+        <div class="popup-row"><span class="popup-key">Equipamento:</span><span class="popup-val">${stLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Estado:</span><span class="popup-val">${wsLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Modo:</span><span class="popup-val">${modoLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Falha:</span><span class="popup-val">${falhaLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Atualizado:</span><span class="popup-val" style="font-size:.77rem">${tsLabel}</span></div>
+        ${eq.description ? `<div class="popup-row"><span class="popup-key">Descrição</span><span class="popup-val">${eq.description}</span></div>` : ''}
+        <button class="popup-btn" onclick="window.location.href='/painel?id=${eq.id}'">
+            <i class="fas fa-tachometer-alt"></i> Acessar Painel
+        </button>`;
 }
 
 function addMarker(eq) {
-    const lat = parseFloat(eq.lat);
-    const lng = parseFloat(eq.lng);
-    if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return;
-
-    const iconClass = ICONS[eq.type] || 'fa-cog';
-    const hasNivel = !!(eq.nivel_canal);
-    const markerHtml = `
-        <div style="background:var(--accent); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); border:2px solid white;">
-            <i class="fas ${iconClass}" style="color:white; font-size:1rem;"></i>
-        </div>
-    `;
-    const customIcon = L.divIcon({
-        html: markerHtml,
-        iconSize: [36, 36],
-        className: 'custom-marker',
-        popupAnchor: [0, -18]
-    });
-
-    const marker = L.marker([lat, lng], { icon: customIcon })
-        .addTo(map)
-        .bindPopup(`
-            <strong>${escapeHtml(eq.name)}</strong><br>
-            Tipo: ${escapeHtml(eq.type)}<br>
-            ${eq.location ? `Local: ${escapeHtml(eq.location)}` : ''}<br>
-            <button onclick="window.location.href='/painel?id=${eq.id}'" style="margin-top:6px;background:#2196F3;border:none;padding:5px 12px;border-radius:5px;color:white;cursor:pointer;">
-                <i class="fas fa-chart-line"></i> Acessar Painel
-            </button>
-        `);
-
-    marker.on('click', () => {
-        showDetails(eq);
-        highlightMarker(eq.id);
-        // Seleciona o item na lista
-        document.querySelectorAll('.equip-item').forEach(el => {
-            el.classList.remove('selected');
-            if (el.dataset.id === eq.id) el.classList.add('selected');
-        });
-    });
-
-    markers[eq.id] = marker;
+    if (!eq.lat || !eq.lng || !map) return;
+    if (mapMarkers[eq.id]) {
+        mapMarkers[eq.id].remove();
+        delete mapMarkers[eq.id];
+    }
+    const marker = L.marker([eq.lat, eq.lng], { icon: makeIcon(eq.id) })
+        .bindPopup(popupHTML(eq), { maxWidth: 280 })
+        .addTo(map);
+    mapMarkers[eq.id] = marker;
 }
 
-function highlightMarker(id) {
-    // Resetar todos os marcadores para ícone normal
+function updateAllMarkers() {
+    if (!map) return;
     equipments.forEach(eq => {
-        const m = markers[eq.id];
-        if (m) {
-            const iconClass = ICONS[eq.type] || 'fa-cog';
-            const normalHtml = `
-                <div style="background:var(--accent); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); border:2px solid white;">
-                    <i class="fas ${iconClass}" style="color:white; font-size:1rem;"></i>
-                </div>
-            `;
-            m.setIcon(L.divIcon({ html: normalHtml, iconSize: [36, 36], className: 'custom-marker' }));
-        }
+        if (!eq.lat || !eq.lng) return;
+        const m = mapMarkers[eq.id];
+        if (!m) { addMarker(eq); return; }
+        m.setIcon(makeIcon(eq.id));
+        if (m.isPopupOpen()) m.setPopupContent(popupHTML(eq));
     });
-
-    // Destacar o marcador selecionado
-    const selectedEq = equipments.find(e => e.id === id);
-    if (selectedEq && markers[id]) {
-        const iconClass = ICONS[selectedEq.type] || 'fa-cog';
-        const highlightHtml = `
-            <div style="background:#FFC107; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 15px rgba(255,193,7,0.8); border:3px solid white; transition:all .2s;">
-                <i class="fas ${iconClass}" style="color:#1a1a1a; font-size:1.2rem;"></i>
-            </div>
-        `;
-        markers[id].setIcon(L.divIcon({ html: highlightHtml, iconSize: [42, 42], className: 'custom-marker' }));
-        // Abrir popup e centralizar
-        markers[id].openPopup();
-        map.setView(markers[id].getLatLng(), 12);
-    }
 }
 
-function showDetails(eq) {
-    $('modal-title').textContent = eq.name;
-    const hasNivel = !!(eq.nivel_canal);
-    const statusOnline = deviceStatus[eq.poco_id] === true;
-    const statusText = statusOnline ? '<span style="color:#4CAF50"><i class="fas fa-circle"></i> Online</span>' : '<span style="color:#F44336"><i class="fas fa-circle"></i> Offline</span>';
-
-    let nivelHtml = '';
-    if (hasNivel) {
-        nivelHtml = `
-            <div class="modal-nivel">
-                <div class="modal-detail-row">
-                    <span class="modal-detail-label"><i class="fas fa-ruler-vertical"></i> Sensor Nível:</span>
-                    <span class="modal-detail-value">Canal ${escapeHtml(eq.nivel_canal)}</span>
-                </div>
-                <div class="modal-detail-row">
-                    <span class="modal-detail-label"><i class="fas fa-chart-line"></i> Tópico:</span>
-                    <span class="modal-detail-value" style="font-size:.7rem">${escapeHtml(eq.nivel_topic)}</span>
-                </div>
-            </div>
-        `;
-    }
-
-    const bodyHtml = `
-        <div class="modal-detail-row">
-            <span class="modal-detail-label">Tipo:</span>
-            <span class="modal-detail-value">${escapeHtml(eq.type)}</span>
-        </div>
-        <div class="modal-detail-row">
-            <span class="modal-detail-label">ID do Poço:</span>
-            <span class="modal-detail-value"><code>${escapeHtml(eq.poco_id)}</code></span>
-        </div>
-        <div class="modal-detail-row">
-            <span class="modal-detail-label">Localização:</span>
-            <span class="modal-detail-value">${escapeHtml(eq.location || '—')}</span>
-        </div>
-        <div class="modal-detail-row">
-            <span class="modal-detail-label">Status MQTT:</span>
-            <span class="modal-detail-value">${statusText}</span>
-        </div>
-        <div class="modal-detail-row">
-            <span class="modal-detail-label">Comandos:</span>
-            <span class="modal-detail-value" style="font-size:.7rem">${escapeHtml(eq.topic_cmd)}</span>
-        </div>
-        <div class="modal-detail-row">
-            <span class="modal-detail-label">Dados:</span>
-            <span class="modal-detail-value" style="font-size:.7rem">${escapeHtml(eq.topic_dados)}</span>
-        </div>
-        ${eq.description ? `<div class="modal-detail-row"><span class="modal-detail-label">Descrição:</span><span class="modal-detail-value">${escapeHtml(eq.description)}</span></div>` : ''}
-        ${nivelHtml}
-    `;
-
-    $('modal-body').innerHTML = bodyHtml;
-    const painelLink = $('modal-painel-link');
-    painelLink.href = `/painel?id=${eq.id}`;
-    $('detailModal').classList.add('open');
-}
-
-function closeModal() {
-    $('detailModal').classList.remove('open');
-}
-
-$('modalCloseBtn').onclick = closeModal;
-$('detailModal').onclick = e => { if (e.target === $('detailModal')) closeModal(); };
-
+// ── MQTT ─────────────────────────────────────────────────
 function connectMQTT() {
-    // Configurações MQTT (mesmo broker)
-    const BROKER = 'wss://mqtt.aguasanta.agr.br';
-    const USER   = 'coas';
-    const PASS   = 'AguaSanta@452';
-
     mqttClient = mqtt.connect(BROKER, {
-        clientId: 'AGS_Operador_' + Math.random().toString(16).substr(2, 8),
-        username: USER,
-        password: PASS,
-        keepalive: 60,
-        clean: true,
-        reconnectPeriod: 3000
+        clientId:       'AGS_OpList_' + Math.random().toString(16).substr(2, 8),
+        username:       MQTT_USER,
+        password:       MQTT_PASS,
+        keepalive:      60,
+        clean:          true,
+        connectTimeout: 6000,
+        reconnectPeriod:4000,
     });
 
     mqttClient.on('connect', () => {
-        console.log('MQTT conectado (operador)');
-        // Subscrever tópicos de status de todos os equipamentos
-        equipments.forEach(eq => {
-            const statusTopic = eq.topic_status;
-            if (statusTopic) {
-                mqttClient.subscribe(statusTopic, { qos: 1 }, err => {
-                    if (err) console.warn(`Erro ao subscrever ${statusTopic}:`, err);
-                });
-            }
-        });
+        setMqttBar('ok', 'Servidor Online');
+        subscribeAll();
     });
 
     mqttClient.on('message', (topic, payload) => {
-        const msg = payload.toString();
-        // Encontrar qual equipamento tem esse tópico de status
-        const eq = equipments.find(e => e.topic_status === topic);
-        if (eq) {
-            const isOnline = msg.toLowerCase() === 'online';
-            deviceStatus[eq.poco_id] = isOnline;
-            // Atualizar indicador visual na lista
-            const item = document.querySelector(`.equip-item[data-poco="${eq.poco_id}"]`);
-            if (item) {
-                const statusDiv = item.querySelector('.equip-status');
-                if (statusDiv) {
-                    if (isOnline) {
-                        statusDiv.classList.add('online');
-                    } else {
-                        statusDiv.classList.remove('online');
-                    }
-                }
+        const msg = payload.toString().trim();
+
+        const eqByStatus = equipments.find(e => e.topic_status === topic);
+        if (eqByStatus) {
+            const st = (msg.toLowerCase() === 'online') ? 'online' : 'offline';
+            if (deviceStatus[eqByStatus.poco_id] !== st) {
+                deviceStatus[eqByStatus.poco_id] = st;
+                updateCardBadge(eqByStatus.id, st);
             }
-            // Atualizar popup do marcador? opcional
+            return;
+        }
+
+        const eqByDados = equipments.find(e => e.topic_dados === topic);
+        if (eqByDados) {
+            try {
+                const data = JSON.parse(msg);
+                rawJson[eqByDados.poco_id] = data;
+
+                const ligado = data.Ligado_desligado === '1' || data.Ligado_desligado === 1;
+                const estado = ligado ? 'Ligado' : 'Desligado';
+                wellState[eqByDados.poco_id] = estado;
+
+                updateCardAllFields(eqByDados.id);
+
+                const m = mapMarkers[eqByDados.id];
+                if (m) {
+                    m.setIcon(makeIcon(eqByDados.id));
+                    if (m.isPopupOpen()) m.setPopupContent(popupHTML(eqByDados));
+                }
+            } catch(_) {}
         }
     });
 
-    mqttClient.on('error', err => console.warn('MQTT err:', err));
+    mqttClient.on('reconnect', () => setMqttBar('warn', 'Reconectando ao Servidor...'));
+    mqttClient.on('close',     () => setMqttBar('err',  'Servidor desconectado'));
+    mqttClient.on('error',     () => setMqttBar('err',  'Erro na conexão com o Servidor'));
 }
 
-// Inicializar
-loadEquipments();
+function subscribeAll() {
+    equipments.forEach(eq => {
+        if (eq.topic_status) mqttClient.subscribe(eq.topic_status, { qos:1 });
+        if (eq.topic_dados)  mqttClient.subscribe(eq.topic_dados,  { qos:1 });
+    });
+}
+
+function setMqttBar(state, label) {
+    const dot = document.getElementById('mqtt-dot');
+    dot.className = 'mqtt-dot' + (state === 'ok' ? ' ok' : state === 'err' ? ' err' : '');
+    document.getElementById('mqtt-label').textContent = label;
+}
+
+function updateCardBadge(eqId, status) {
+    const card  = document.querySelector(`.card[data-eq-id="${eqId}"]`);
+    const badge = card && card.querySelector('.status-badge');
+    if (card && badge) {
+        card.classList.remove('online','offline');
+        card.classList.add(status);
+        badge.className = `status-badge ${status}`;
+        const label = status === 'online' ? 'Online' : 'Offline';
+        badge.innerHTML = `<span class="badge-dot"></span>${label}`;
+    }
+    const m = mapMarkers[eqId];
+    if (m) {
+        m.setIcon(makeIcon(eqId));
+        if (m.isPopupOpen()) {
+            const eq = equipments.find(e => e.id === eqId);
+            if (eq) m.setPopupContent(popupHTML(eq));
+        }
+    }
+}
+
+function updateCardAllFields(eqId) {
+    const card = document.querySelector(`.card[data-eq-id="${eqId}"]`);
+    if (!card) return;
+
+    const eq  = equipments.find(e => e.id === eqId);
+    const rj  = eq ? (rawJson[eq.poco_id] || {}) : {};
+    const ws  = eq ? wellState[eq.poco_id] : null;
+
+    const wsEl = card.querySelector('.well-state-value');
+    if (wsEl) {
+        wsEl.textContent = ws || '---';
+        wsEl.style.color = ws === 'Ligado' ? '#4CAF50' : ws === 'Desligado' ? '#F44336' : 'rgba(255,255,255,0.4)';
+    }
+
+    const modoEl = card.querySelector('.modo-value');
+    if (modoEl) {
+        const auto = rj.Aut_man === '1' || rj.Aut_man === 1;
+        modoEl.textContent = rj.Aut_man != null ? (auto ? 'Automático' : 'Manual') : '---';
+        modoEl.style.color = rj.Aut_man != null ? (auto ? '#4CAF50' : '#FFC107') : 'rgba(255,255,255,0.4)';
+    }
+
+    const falhaEl = card.querySelector('.falha-value');
+    if (falhaEl) {
+        const falha = rj.Falha === '1' || rj.Falha === 1;
+        falhaEl.textContent = rj.Falha != null ? (falha ? 'Com Falha' : 'Sem Falha') : '---';
+        falhaEl.style.color = rj.Falha != null ? (falha ? '#F44336' : '#4CAF50') : 'rgba(255,255,255,0.4)';
+    }
+
+    const tsEl = card.querySelector('.ts-value');
+    if (tsEl) tsEl.textContent = rj.Ultima_atualizacao || rj.Registro || '---';
+}
+
+function updateCardJson(eqId, data) {
+    const block = document.querySelector(`.card[data-eq-id="${eqId}"] .json-rows`);
+    if (!block) return;
+    const SKIP = new Set(['Ip']);
+    block.innerHTML = '';
+    Object.entries(data).forEach(([k, v]) => {
+        if (SKIP.has(k)) return;
+        const row = document.createElement('div');
+        row.className = 'json-row';
+        let valClass = 'json-val';
+        let display  = String(v);
+        if (v === true  || v === 1  || v === '1')  { valClass += ' v-true';  }
+        if (v === false || v === 0  || v === '0')  { valClass += ' v-false'; }
+        if (typeof v === 'number' && v !== 0 && v !== 1) valClass += ' v-num';
+        row.innerHTML = `<span class="json-key">${k}</span><span class="${valClass}">${display}</span>`;
+        block.appendChild(row);
+    });
+}
+
+// ── LOAD ─────────────────────────────────────────────────
+async function load() {
+    try {
+        const r = await fetch('/api/equipments');
+        equipments = await r.json();
+        equipments.forEach(eq => {
+            if (!deviceStatus[eq.poco_id]) deviceStatus[eq.poco_id] = 'waiting';
+            if (!wellState[eq.poco_id])    wellState[eq.poco_id]    = null;
+            if (!rawJson[eq.poco_id])      rawJson[eq.poco_id]      = null;
+        });
+        render();
+        if (map) updateAllMarkers();
+        if (mqttClient && mqttClient.connected) subscribeAll();
+    } catch(e) {
+        document.getElementById('dashboard').innerHTML =
+            '<div class="empty"><i class="fas fa-exclamation-triangle"></i><p>Erro ao carregar. Atualize a página.</p></div>';
+    }
+}
+
+// ── RENDER ────────────────────────────────────────────────
+function render() {
+    const search = document.getElementById('search').value.toLowerCase();
+    const dash   = document.getElementById('dashboard');
+    dash.innerHTML = '';
+
+    const filtered = equipments.filter(eq =>
+        !search
+        || eq.name.toLowerCase().includes(search)
+        || (eq.location || '').toLowerCase().includes(search)
+        || eq.poco_id.toLowerCase().includes(search)
+    );
+
+    if (filtered.length === 0) {
+        dash.innerHTML = '<div class="empty"><i class="fas fa-search"></i><p>Nenhum equipamento encontrado.</p></div>';
+        return;
+    }
+
+    filtered.forEach(eq => {
+        const icon  = ICONS[eq.type] || 'fa-cog';
+        const st    = deviceStatus[eq.poco_id] || 'waiting';
+        const label = st === 'online' ? 'Online' : st === 'offline' ? 'Offline' : 'Aguardando...';
+        const ws    = wellState[eq.poco_id];
+        const wsLabel = ws || '---';
+        const wsColor = ws === 'Ligado' ? '#4CAF50' : ws === 'Desligado' ? '#F44336' : 'rgba(255,255,255,0.4)';
+
+        const rj = rawJson[eq.poco_id] || {};
+        const auto  = rj.Aut_man != null ? (rj.Aut_man === '1' || rj.Aut_man === 1 ? 'Automático' : 'Manual') : '---';
+        const autoColor = rj.Aut_man != null ? (rj.Aut_man === '1' || rj.Aut_man === 1 ? '#4CAF50' : '#FFC107') : 'rgba(255,255,255,0.4)';
+        const falha = rj.Falha != null ? (rj.Falha === '1' || rj.Falha === 1 ? 'Com Falha' : 'Sem Falha') : '---';
+        const falhaColor = rj.Falha != null ? (rj.Falha === '1' || rj.Falha === 1 ? '#F44336' : '#4CAF50') : 'rgba(255,255,255,0.4)';
+        const ts = rj.Ultima_atualizacao || rj.Registro || '---';
+
+        const card = document.createElement('div');
+        card.className = `card${st !== 'waiting' ? ' ' + st : ''}`;
+        card.dataset.eqId = eq.id;
+
+        card.innerHTML = `
+            <div class="card-header">
+                <div class="card-name">
+                    <i class="fas ${icon}"></i> ${eq.name}
+                </div>
+                <div class="status-badge ${st}">
+                    <span class="badge-dot"></span>${label}
+                </div>
+            </div>
+            <div class="card-detail">
+                <span class="detail-label">Localização:</span>
+                <span class="detail-value">${eq.location || '—'}</span>
+            </div>
+            <div class="card-detail">
+                <span class="detail-label">Estado:</span>
+                <span class="detail-value well-state-value" style="color:${wsColor};font-weight:700">${wsLabel}</span>
+            </div>
+            <div class="card-detail">
+                <span class="detail-label">Modo:</span>
+                <span class="detail-value modo-value" style="color:${autoColor};font-weight:700">${auto}</span>
+            </div>
+            <div class="card-detail">
+                <span class="detail-label">Falha:</span>
+                <span class="detail-value falha-value" style="color:${falhaColor};font-weight:700">${falha}</span>
+            </div>
+            <div class="card-detail">
+                <span class="detail-label">Última Atualização:</span>
+                <span class="detail-value ts-value" style="font-size:.78rem">${ts}</span>
+            </div>
+            ${eq.description ? `
+            <div class="card-detail">
+                <span class="detail-label">Descrição</span>
+                <span class="detail-value">${eq.description}</span>
+            </div>` : ''}
+            <div class="card-footer">
+                <button class="access-btn">
+                    <i class="fas fa-tachometer-alt"></i> Acessar Painel
+                </button>
+            </div>`;
+
+        const open = () => { window.location.href = `/painel?id=${eq.id}`; };
+        card.querySelector('.access-btn').onclick = open;
+        card.onclick = e => { if (!e.target.closest('.access-btn')) open(); };
+
+        dash.appendChild(card);
+    });
+}
+
+// ── INIT ─────────────────────────────────────────────────
+document.getElementById('search').oninput = render;
+
+load().then(() => {
+    if (typeof mqtt !== 'undefined') connectMQTT();
+    else setMqttBar('err', 'Biblioteca MQTT não carregada');
+});
+
+setInterval(load, 30000);
 </script>
 </body>
 </html>
