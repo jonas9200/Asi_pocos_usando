@@ -236,5 +236,22 @@
     "topic_status": "as/poco/C02/status",
     "createdAt": "2026-05-13T13:27:10.096Z",
     "updatedAt": "2026-05-13T13:27:10.096Z"
+  },
+  {
+    "id": "1778678838242",
+    "name": "Poço C-02",
+    "type": "Poço",
+    "location": "Caviuna",
+    "poco_id": "C02",
+    "description": "",
+    "lat": -13.846864,
+    "lng": -45.095935,
+    "nivel_canal": "",
+    "nivel_topic": "",
+    "topic_cmd": "as/poco/C02/comando",
+    "topic_dados": "as/poco/C02/dados",
+    "topic_status": "as/poco/C02/status",
+    "createdAt": "2026-05-13T13:27:18.242Z",
+    "updatedAt": "2026-05-13T13:27:18.242Z"
   }
 ]
