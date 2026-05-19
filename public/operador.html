@@ -111,7 +111,7 @@
         .popup-btn   { display:block; width:100%; margin-top:10px; padding:8px; background:#2196F3; border:none; border-radius:6px; color:white; font-weight:700; font-size:.82rem; cursor:pointer; text-align:center; transition:background .2s; }
         .popup-btn:hover { background:#1976D2; }
 
-        /* Marker icon — flex-shrink:0 garante que o círculo nunca seja comprimido */
+        /* Marker icon */
         .eq-marker {
             width: 32px;
             height: 32px;
@@ -125,14 +125,20 @@
             box-shadow: 0 3px 10px rgba(0,0,0,0.5);
             transition: all .3s;
         }
-        .eq-marker.online-ligado   { background:#1565c0; border-color:#2196F3; }
-        .eq-marker.online-desligado{ background:#2e7d32; border-color:#4CAF50; }
-        .eq-marker.offline         { background:#b71c1c; border-color:#F44336; }
-        .eq-marker.waiting         { background:#555;    border-color:#aaa; }
+
+        /* 7 estados do marcador */
+        .eq-marker.online-auto-desligado   { background:#2e7d32; border-color:#4CAF50; }
+        .eq-marker.online-manual-desligado { background:#2e7d32; border-color:#FF9800; border-width:4px; }
+        .eq-marker.online-auto-ligado      { background:#1565c0; border-color:#2196F3; }
+        .eq-marker.online-manual-ligado    { background:#1565c0; border-color:#FF9800; border-width:4px; }
+        .eq-marker.offline-auto            { background:#b71c1c; border-color:#F44336; }
+        .eq-marker.offline-manual          { background:#b71c1c; border-color:#FF9800; border-width:4px; }
+        .eq-marker.waiting                 { background:#555;    border-color:#aaa; }
+        .eq-marker.falha                   { background:#F57F17; border-color:#FFEB3B; border-width:4px; }
 
         .map-legend {
             display: flex;
-            gap: 16px;
+            gap: 14px;
             flex-wrap: wrap;
             margin-top: 12px;
             font-size: .8rem;
@@ -140,7 +146,7 @@
             padding: 0 4px;
         }
         .legend-item { display:flex; align-items:center; gap:7px; }
-        .legend-dot  { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+        .legend-dot  { width:13px; height:13px; border-radius:50%; flex-shrink:0; box-sizing:border-box; }
 
         /* Search */
         .filter-bar { display:flex; margin-bottom:20px; }
@@ -199,44 +205,6 @@
         .detail-label { font-weight:600; color:rgba(255,255,255,0.65); }
         .detail-value { color:var(--accent); text-align:right; }
 
-        /* JSON data block in card */
-        .json-block {
-            margin-top: 10px;
-            background: rgba(0,0,0,0.35);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 7px;
-            overflow: hidden;
-        }
-        .json-block-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 7px 11px;
-            font-size: .72rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: rgba(255,255,255,0.4);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            cursor: default;
-        }
-        .json-block-header span { color: var(--accent); font-size:.68rem; }
-        .json-rows { padding: 6px 4px; }
-        .json-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4px 8px;
-            font-size: .76rem;
-            border-radius: 4px;
-            transition: background .15s;
-        }
-        .json-row:hover { background: rgba(255,255,255,0.05); }
-        .json-key  { color: rgba(255,255,255,0.5); font-family: monospace; word-break:break-all; }
-        .json-val  { color: #81d4fa; font-family: monospace; text-align:right; word-break:break-all; max-width:55%; }
-        .json-val.v-true  { color: #4CAF50; font-weight:700; }
-        .json-val.v-false { color: #F44336; font-weight:700; }
-        .json-val.v-num   { color: #ffcc80; }
-        .json-empty { padding:10px 8px; font-size:.76rem; color:rgba(255,255,255,0.25); text-align:center; font-style:italic; }
         .access-btn {
             width:100%; padding:11px; border:none; border-radius:7px;
             background:var(--accent); color:white; font-weight:bold; font-size:.92rem;
@@ -292,10 +260,38 @@
         </div>
         <div id="map"></div>
         <div class="map-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#2196F3;border:2px solid #64B5F6"></div> Online · Ligado</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#4CAF50;border:2px solid #81C784"></div> Online · Desligado</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#F44336;border:2px solid #E57373"></div> Offline</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#777;border:2px solid #aaa"></div> Aguardando</div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#2e7d32;border:2px solid #4CAF50"></div>
+                Online · Auto · Desligado
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#2e7d32;border:3px solid #FF9800"></div>
+                Online · Manual · Desligado
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#1565c0;border:2px solid #2196F3"></div>
+                Online · Auto · Ligado
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#1565c0;border:3px solid #FF9800"></div>
+                Online · Manual · Ligado
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#b71c1c;border:2px solid #F44336"></div>
+                Offline · Auto
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#b71c1c;border:3px solid #FF9800"></div>
+                Offline · Manual
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#F57F17;border:3px solid #FFEB3B"></div>
+                ⚠ Com Falha
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#555;border:2px solid #aaa"></div>
+                Aguardando
+            </div>
         </div>
     </div>
 </div>
@@ -362,26 +358,55 @@ function initMap() {
     setTimeout(() => map.invalidateSize(), 200);
 }
 
+// ── MARKER CLASS — 7 estados + waiting ───────────────────
 function markerClass(eqId) {
-    const eq = equipments.find(e => e.id === eqId);
+    const eq  = equipments.find(e => e.id === eqId);
     if (!eq) return 'waiting';
-    const st = deviceStatus[eq.poco_id] || 'waiting';
-    const ws = wellState[eq.poco_id];
-    if (st === 'offline')  return 'offline';
-    if (st === 'waiting')  return 'waiting';
-    return ws === 'Ligado' ? 'online-ligado' : 'online-desligado';
+
+    const st  = deviceStatus[eq.poco_id] || 'waiting';
+    const rj  = rawJson[eq.poco_id] || {};
+    const ws  = wellState[eq.poco_id];
+
+    const ligado = ws === 'Ligado';
+
+    // Aut_man: '1' ou 1 = Automático | '0' ou 0 = Manual
+    const manual = (rj.Aut_man === '0' || rj.Aut_man === 0);
+
+    // Falha tem prioridade máxima — sobrepõe tudo
+    const falha = (rj.Falha === '1' || rj.Falha === 1);
+    if (falha) return 'falha';
+
+    if (st === 'waiting') return 'waiting';
+
+    if (st === 'offline') return manual ? 'offline-manual' : 'offline-auto';
+
+    // online
+    if (ligado)  return manual ? 'online-manual-ligado'    : 'online-auto-ligado';
+    return               manual ? 'online-manual-desligado' : 'online-auto-desligado';
 }
 
 function makeIcon(eqId) {
     const cls  = markerClass(eqId);
     const eq   = equipments.find(e => e.id === eqId);
-    const icon = eq ? (ICONS[eq.type] || 'fa-cog') : 'fa-cog';
+    const rj   = eq ? (rawJson[eq.poco_id] || {}) : {};
     const name = eq ? eq.name : '';
 
-    const labelColor = cls === 'online-ligado'    ? '#64B5F6'
-                     : cls === 'online-desligado' ? '#4CAF50'
-                     : cls === 'offline'          ? '#EF9A9A'
-                     : '#ccc';
+    // Com falha: ícone de alerta; caso contrário: ícone do tipo de equipamento
+    const falha = (rj.Falha === '1' || rj.Falha === 1);
+    const icon  = falha
+        ? 'fa-exclamation-triangle'
+        : (eq ? (ICONS[eq.type] || 'fa-cog') : 'fa-cog');
+
+    // Cor do label conforme estado
+    const labelColor =
+          cls === 'online-auto-ligado'      ? '#64B5F6'
+        : cls === 'online-manual-ligado'    ? '#FFB74D'
+        : cls === 'online-auto-desligado'   ? '#81C784'
+        : cls === 'online-manual-desligado' ? '#A5D6A7'
+        : cls === 'offline-manual'          ? '#FFCC80'
+        : cls.startsWith('offline')         ? '#EF9A9A'
+        : cls === 'falha'                   ? '#FFF176'
+        : '#ccc';
 
     return L.divIcon({
         className: '',
@@ -403,8 +428,8 @@ function makeIcon(eqId) {
                     pointer-events:none;
                 ">${name}</span>
             </div>`,
-        iconSize:   null,      // ← sem restrição de tamanho no container flex
-        iconAnchor: [16, 16],  // ← ancora no centro exato do círculo (32/2)
+        iconSize:   null,
+        iconAnchor: [16, 16],
         popupAnchor:[0, -22],
     });
 }
@@ -437,7 +462,7 @@ function popupHTML(eq) {
 
     return `
         <div class="popup-name">
-            <i class="fas ${ICONS[eq.type]||'fa-cog'}"></i> ${eq.name}
+            <i class="fas ${falha ? 'fa-exclamation-triangle' : (ICONS[eq.type] || 'fa-cog')}"></i> ${eq.name}
         </div>
         <div class="popup-row"><span class="popup-key">Localização:</span><span class="popup-val">${eq.location || '—'}</span></div>
         <div class="popup-row"><span class="popup-key">Equipamento:</span><span class="popup-val">${stLabel}</span></div>
@@ -595,32 +620,13 @@ function updateCardAllFields(eqId) {
     if (tsEl) tsEl.textContent = rj.Ultima_atualizacao || rj.Registro || '---';
 }
 
-function updateCardJson(eqId, data) {
-    const block = document.querySelector(`.card[data-eq-id="${eqId}"] .json-rows`);
-    if (!block) return;
-    const SKIP = new Set(['Ip']);
-    block.innerHTML = '';
-    Object.entries(data).forEach(([k, v]) => {
-        if (SKIP.has(k)) return;
-        const row = document.createElement('div');
-        row.className = 'json-row';
-        let valClass = 'json-val';
-        let display  = String(v);
-        if (v === true  || v === 1  || v === '1')  { valClass += ' v-true';  }
-        if (v === false || v === 0  || v === '0')  { valClass += ' v-false'; }
-        if (typeof v === 'number' && v !== 0 && v !== 1) valClass += ' v-num';
-        row.innerHTML = `<span class="json-key">${k}</span><span class="${valClass}">${display}</span>`;
-        block.appendChild(row);
-    });
-}
-
 // ── LOAD ─────────────────────────────────────────────────
 async function load() {
     try {
-       const r = await fetch('/api/equipments');
-equipments = (await r.json()).sort((a, b) =>
-    a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
-);
+        const r = await fetch('/api/equipments');
+        equipments = (await r.json()).sort((a, b) =>
+            a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
+        );
         equipments.forEach(eq => {
             if (!deviceStatus[eq.poco_id]) deviceStatus[eq.poco_id] = 'waiting';
             if (!wellState[eq.poco_id])    wellState[eq.poco_id]    = null;
