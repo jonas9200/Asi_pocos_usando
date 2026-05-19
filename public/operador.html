@@ -126,7 +126,7 @@
             transition: all .3s;
         }
 
-        /* 7 estados do marcador */
+        /* 7 estados do marcador + falha-offline */
         .eq-marker.online-auto-desligado   { background:#2e7d32; border-color:#4CAF50; }
         .eq-marker.online-manual-desligado { background:#2e7d32; border-color:#FF9800; border-width:4px; }
         .eq-marker.online-auto-ligado      { background:#1565c0; border-color:#2196F3; }
@@ -135,6 +135,7 @@
         .eq-marker.offline-manual          { background:#b71c1c; border-color:#FF9800; border-width:4px; }
         .eq-marker.waiting                 { background:#555;    border-color:#aaa; }
         .eq-marker.falha                   { background:#F57F17; border-color:#FFEB3B; border-width:4px; }
+        .eq-marker.falha-offline           { background:#b71c1c; border-color:#FFEB3B; border-width:4px; }
 
         .map-legend {
             display: flex;
@@ -289,6 +290,10 @@
                 ⚠ Com Falha
             </div>
             <div class="legend-item">
+                <div class="legend-dot" style="background:#b71c1c;border:3px solid #FFEB3B"></div>
+                ⚠ Falha + Offline
+            </div>
+            <div class="legend-item">
                 <div class="legend-dot" style="background:#555;border:2px solid #aaa"></div>
                 Aguardando
             </div>
@@ -358,7 +363,7 @@ function initMap() {
     setTimeout(() => map.invalidateSize(), 200);
 }
 
-// ── MARKER CLASS — 7 estados + waiting ───────────────────
+// ── MARKER CLASS — 8 estados + waiting ───────────────────
 function markerClass(eqId) {
     const eq  = equipments.find(e => e.id === eqId);
     if (!eq) return 'waiting';
@@ -374,7 +379,8 @@ function markerClass(eqId) {
 
     // Falha tem prioridade máxima — sobrepõe tudo
     const falha = (rj.Falha === '1' || rj.Falha === 1);
-    if (falha) return 'falha';
+    if (falha && st === 'offline') return 'falha-offline'; // vermelho + borda amarela
+    if (falha) return 'falha';                              // laranja + borda amarela
 
     if (st === 'waiting') return 'waiting';
 
@@ -405,6 +411,7 @@ function makeIcon(eqId) {
         : cls === 'online-manual-desligado' ? '#A5D6A7'
         : cls === 'offline-manual'          ? '#FFCC80'
         : cls.startsWith('offline')         ? '#EF9A9A'
+        : cls === 'falha-offline'           ? '#FFEB3B'
         : cls === 'falha'                   ? '#FFF176'
         : '#ccc';
 
