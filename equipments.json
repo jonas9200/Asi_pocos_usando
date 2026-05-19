@@ -304,5 +304,22 @@
     "topic_status": "as/poco/CO04/status",
     "createdAt": "2026-05-19T11:31:26.872Z",
     "updatedAt": "2026-05-19T11:31:26.872Z"
+  },
+  {
+    "id": "1779201323763",
+    "name": "Poço CO-06",
+    "type": "Poço",
+    "location": "Conquista",
+    "poco_id": "CO06",
+    "description": "",
+    "lat": -13.799173,
+    "lng": -45.098549,
+    "nivel_canal": "",
+    "nivel_topic": "",
+    "topic_cmd": "as/poco/CO06/comando",
+    "topic_dados": "as/poco/CO06/dados",
+    "topic_status": "as/poco/CO06/status",
+    "createdAt": "2026-05-19T14:35:23.763Z",
+    "updatedAt": "2026-05-19T14:35:23.763Z"
   }
 ]
