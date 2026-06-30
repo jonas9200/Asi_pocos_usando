@@ -355,5 +355,22 @@
     "topic_status": "as/poco/C2/status",
     "createdAt": "2026-06-30T14:23:23.947Z",
     "updatedAt": "2026-06-30T14:23:23.947Z"
+  },
+  {
+    "id": "1782829477031",
+    "name": "TESTE",
+    "type": "Poço",
+    "location": "AS1",
+    "poco_id": "C2",
+    "description": "",
+    "lat": -19.360102,
+    "lng": -47.36427,
+    "nivel_canal": "",
+    "nivel_topic": "",
+    "topic_cmd": "as/poco/C2/comando",
+    "topic_dados": "as/poco/C2/dados",
+    "topic_status": "as/poco/C2/status",
+    "createdAt": "2026-06-30T14:24:37.031Z",
+    "updatedAt": "2026-06-30T14:24:37.031Z"
   }
 ]
